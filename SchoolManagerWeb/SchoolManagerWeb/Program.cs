@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using SchoolManagerWeb.Client.Pages;
 using SchoolManagerWeb.Components;
 using SchoolManagerWeb.Components.Account;
 using SchoolManagerWeb.Data;

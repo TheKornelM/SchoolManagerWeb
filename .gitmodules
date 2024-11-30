@@ -1,0 +1,3 @@
+[submodule "SchoolManagerModel"]
+	path = SchoolManagerModel
+	url = https://github.com/TheKornelM/SchoolManagerModel

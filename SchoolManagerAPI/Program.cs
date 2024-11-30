@@ -25,6 +25,8 @@ public class Program
 
         app.UseAuthorization();
 
+        DotNetEnv.Env.Load();
+
         var summaries = new[]
         {
             "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"

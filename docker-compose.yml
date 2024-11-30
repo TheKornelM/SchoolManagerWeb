@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  schoolmanagerapi:
+    image: ${DOCKER_REGISTRY-}schoolmanagerapi
+    build:
+      context: .
+      dockerfile: SchoolManagerAPI/Dockerfile
+    ports:
+      - "5027:8080" # Map HTTP port
+      - "5028:8443" # Map HTTPS port
+    networks:
+      - app-network
+    environment:
+      - ASPNETCORE_URLS=http://+:8080;https://+:8443
+    volumes:
+      - ./SchoolManagerAPI/certs:/https:ro # Mount the cert directory as read-only
+
+networks:
+  app-network:
+    driver: bridge

@@ -7,7 +7,6 @@ services:
       context: .
       dockerfile: SchoolManagerAPI/Dockerfile
     ports:
-      - "5027:8080" # Map HTTP port
       - "5028:8443" # Map HTTPS port
     networks:
       - app-network

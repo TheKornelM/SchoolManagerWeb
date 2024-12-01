@@ -13,8 +13,27 @@ services:
       - app-network
     environment:
       - ASPNETCORE_URLS=http://+:8080;https://+:8443
+      - "ASPNETCORE_Kestrel__Certificates__Default__Path=/https/SchoolManagerAPI.pfx"
+      - "ASPNETCORE_Kestrel__Certificates__Default__Password=password"
     volumes:
       - ./SchoolManagerAPI/certs:/https:ro # Mount the cert directory as read-only
+  schoolmanagerweb:
+    image: ${DOCKER_REGISTRY-}schoolmanagerweb
+    build:
+      context: .
+      dockerfile: SchoolManagerWeb/SchoolManagerWeb/Dockerfile
+    ports:
+      - "80:80" # Map HTTPS port
+      - "443:443"
+    networks:
+      - app-network
+    environment:
+      - ASPNETCORE_URLS=http://+:80;https://+:443
+      - "ASPNETCORE_Kestrel__Certificates__Default__Path=/https/SchoolManagerWeb.pfx"
+      - "ASPNETCORE_Kestrel__Certificates__Default__Password=password"
+    volumes:
+      - ./SchoolManagerWeb/SchoolManagerWeb/certs:/https:ro # Mount the cert directory as read-only
+      - ./SchoolManagerWeb/SchoolManagerWeb/wwwroot:/app/wwwroot:ro
 
 networks:
   app-network:

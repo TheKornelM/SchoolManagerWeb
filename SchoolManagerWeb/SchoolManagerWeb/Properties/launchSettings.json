@@ -27,8 +27,10 @@
       "environmentVariables": {
         "ASPNETCORE_HTTPS_PORTS": "443",
         "ASPNETCORE_HTTP_PORTS": "80"
+
       },
       "useSSL": true
+
     }
   },
   "$schema": "https://json.schemastore.org/launchsettings.json"

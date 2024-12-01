@@ -23,5 +23,5 @@ RUN dotnet publish "./SchoolManagerAPI.csproj" -c $BUILD_CONFIGURATION -o /app/p
 # Final runtime image
 FROM base AS final
 WORKDIR /app
-COPY --from=publish /app/publish .
+COPY --from=publish /app/publish .s
 ENTRYPOINT ["dotnet", "SchoolManagerAPI.dll"]

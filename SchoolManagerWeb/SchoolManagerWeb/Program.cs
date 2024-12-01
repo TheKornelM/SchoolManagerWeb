@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Hosting.StaticWebAssets;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using SchoolManagerWeb.Components;
 using SchoolManagerWeb.Components.Account;
 using SchoolManagerWeb.Data;
-using System.Diagnostics;
 
 namespace SchoolManagerWeb
 {
@@ -13,6 +13,8 @@ namespace SchoolManagerWeb
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+            DotNetEnv.Env.Load();
 
             // Add services to the container.
             builder.Services.AddRazorComponents()
@@ -24,6 +26,8 @@ namespace SchoolManagerWeb
             builder.Services.AddScoped<IdentityUserAccessor>();
             builder.Services.AddScoped<IdentityRedirectManager>();
             builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
+            StaticWebAssetsLoader.UseStaticWebAssets(builder.Environment, builder.Configuration);
+
 
             builder.Services.AddAuthentication(options =>
             {
@@ -65,9 +69,7 @@ namespace SchoolManagerWeb
                 app.UseHsts();
             }
 
-            DotNetEnv.Env.Load();
-            Debug.WriteLine(System.Environment.GetEnvironmentVariable("ASPNETCORE_Kestrel__Certificates__Default__Path"));
-            Debug.WriteLine(System.Environment.GetEnvironmentVariable("ASPNETCORE_Kestrel__Certificates__Default__Password"));
+
 
             app.UseHttpsRedirection();
 

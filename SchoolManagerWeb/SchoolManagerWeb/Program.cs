@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using SchoolManagerWeb.Components;
 using SchoolManagerWeb.Components.Account;
 using SchoolManagerWeb.Data;
+using System.Diagnostics;
 
 namespace SchoolManagerWeb
 {
@@ -25,15 +26,18 @@ namespace SchoolManagerWeb
             builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
 
             builder.Services.AddAuthentication(options =>
-                {
-                    options.DefaultScheme = IdentityConstants.ApplicationScheme;
-                    options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
-                })
+            {
+                options.DefaultScheme = IdentityConstants.ApplicationScheme;
+                options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
+            })
                 .AddIdentityCookies();
 
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(connectionString));
+            {
+                options.UseSqlServer(connectionString);
+            });
+
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
             builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
@@ -44,6 +48,9 @@ namespace SchoolManagerWeb
             builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 
             var app = builder.Build();
+
+            // Apply migrations at startup
+            ApplyMigrations(app);
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
@@ -57,6 +64,10 @@ namespace SchoolManagerWeb
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+
+            DotNetEnv.Env.Load();
+            Debug.WriteLine(System.Environment.GetEnvironmentVariable("ASPNETCORE_Kestrel__Certificates__Default__Path"));
+            Debug.WriteLine(System.Environment.GetEnvironmentVariable("ASPNETCORE_Kestrel__Certificates__Default__Password"));
 
             app.UseHttpsRedirection();
 
@@ -72,6 +83,15 @@ namespace SchoolManagerWeb
             app.MapAdditionalIdentityEndpoints();
 
             app.Run();
+        }
+
+        private static void ApplyMigrations(WebApplication app)
+        {
+            /*using (var scope = app.Services.CreateScope())
+            {
+                var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                dbContext.Database.Migrate();
+            }*/
         }
     }
 }

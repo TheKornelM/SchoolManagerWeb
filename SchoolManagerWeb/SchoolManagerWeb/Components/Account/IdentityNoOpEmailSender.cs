@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
-using SchoolManagerWeb.Data;
+using SchoolManagerModel.Entities.UserModel;
 
 namespace SchoolManagerWeb.Components.Account
 {

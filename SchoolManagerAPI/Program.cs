@@ -1,4 +1,3 @@
-
 namespace SchoolManagerAPI;
 
 public class Program

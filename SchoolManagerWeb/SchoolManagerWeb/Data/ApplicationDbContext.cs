@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using SchoolManagerModel.Entities.UserModel;
 
 namespace SchoolManagerWeb.Data
 {

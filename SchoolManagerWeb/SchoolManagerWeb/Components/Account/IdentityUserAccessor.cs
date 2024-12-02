@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Identity;
-using SchoolManagerWeb.Data;
+using SchoolManagerModel.Entities.UserModel;
 
 namespace SchoolManagerWeb.Components.Account
 {

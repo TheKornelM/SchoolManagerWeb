@@ -1,9 +1,9 @@
-using System.Security.Claims;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
-using SchoolManagerWeb.Data;
+using SchoolManagerModel.Entities.UserModel;
+using System.Security.Claims;
 
 namespace SchoolManagerWeb.Components.Account
 {

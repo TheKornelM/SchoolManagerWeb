@@ -2,9 +2,10 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Hosting.StaticWebAssets;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using SchoolManagerModel.Entities.UserModel;
+using SchoolManagerModel.Persistence;
 using SchoolManagerWeb.Components;
 using SchoolManagerWeb.Components.Account;
-using SchoolManagerWeb.Data;
 
 namespace SchoolManagerWeb
 {
@@ -37,24 +38,21 @@ namespace SchoolManagerWeb
                 .AddIdentityCookies();
 
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-            builder.Services.AddDbContext<ApplicationDbContext>(options =>
+            builder.Services.AddDbContext<SchoolDbContext>(options =>
             {
                 options.UseSqlServer(connectionString);
             });
 
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-            builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
-                .AddEntityFrameworkStores<ApplicationDbContext>()
+            builder.Services.AddIdentityCore<ApplicationUser>(/*options => options.SignIn.RequireConfirmedAccount = true*/)
+                .AddEntityFrameworkStores<SchoolDbContext>()
                 .AddSignInManager()
                 .AddDefaultTokenProviders();
 
             builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 
             var app = builder.Build();
-
-            // Apply migrations at startup
-            ApplyMigrations(app);
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
@@ -84,16 +82,8 @@ namespace SchoolManagerWeb
             // Add additional endpoints required by the Identity /Account Razor components.
             app.MapAdditionalIdentityEndpoints();
 
-            app.Run();
-        }
 
-        private static void ApplyMigrations(WebApplication app)
-        {
-            /*using (var scope = app.Services.CreateScope())
-            {
-                var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-                dbContext.Database.Migrate();
-            }*/
+            app.Run();
         }
     }
 }

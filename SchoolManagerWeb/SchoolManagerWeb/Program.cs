@@ -50,6 +50,14 @@ namespace SchoolManagerWeb
                 .AddDefaultTokenProviders();
 
             builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+            builder.Services.AddHttpClient("ApiClient", client =>
+            {
+                var apiUrl = builder.Configuration["API_URL"] ?? "http://127.0.0.1:8080";
+                client.BaseAddress = new Uri(apiUrl);
+            }).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+            {
+                ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+            });
 
             var app = builder.Build();
 

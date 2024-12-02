@@ -1,7 +1,30 @@
 ﻿@page "/"
 
+@inject IHttpClientFactory HttpClientFactory
+
 <PageTitle>Home</PageTitle>
 
 <h1>Hello, world!</h1>
 
 Welcome to your new app.
+
+<h3>API Message</h3>
+<p>@message</p>
+
+@code {
+    private string message;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var client = HttpClientFactory.CreateClient("ApiClient");
+        var response = await client.GetAsync("/weatherforecast");
+        if (response.IsSuccessStatusCode)
+        {
+            message = await response.Content.ReadAsStringAsync();
+        }
+        else
+        {
+            message = "Error fetching message from API.";
+        }
+    }
+}

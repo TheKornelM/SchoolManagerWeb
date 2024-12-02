@@ -46,6 +46,11 @@ public class Program
         })
         .WithName("GetWeatherForecast");
 
+        app.MapGet("/api/hello", (HttpContext httpContext) =>
+        {
+            return Results.Ok();
+        });
+
         app.Run();
     }
 }

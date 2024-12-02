@@ -25,3 +25,6 @@ FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .s
 ENTRYPOINT ["dotnet", "SchoolManagerAPI.dll"]
+
+# Run migrations if the database is not up to date
+CMD ["bash", "-c", "dotnet ef database update || dotnet ef migrations add InitialCreate && dotnet ef database update"]

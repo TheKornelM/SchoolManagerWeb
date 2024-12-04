@@ -34,17 +34,6 @@ services:
     depends_on:
       - postgres
 
-  migrate:
-    image: ${DOCKER_REGISTRY-}schoolmanagerweb
-    build:
-      context: .
-      dockerfile: SchoolManagerWeb/SchoolManagerWeb/Dockerfile
-    entrypoint: ["dotnet", "ef", "database", "update"]
-    environment:
-      - "ConnectionStrings__DefaultConnection=Host=postgres;Database=schoolmanagerdb;Username=yourusername;Password=yourpassword"
-    depends_on:
-      - postgres
-
 networks:
   app-network:
     driver: bridge

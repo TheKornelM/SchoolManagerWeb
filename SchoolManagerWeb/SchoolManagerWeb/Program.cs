@@ -3,9 +3,9 @@ using Microsoft.AspNetCore.Hosting.StaticWebAssets;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using SchoolManagerModel.Entities.UserModel;
-using SchoolManagerModel.Persistence;
 using SchoolManagerWeb.Components;
 using SchoolManagerWeb.Components.Account;
+using SchoolManagerWeb.Data;
 
 namespace SchoolManagerWeb
 {
@@ -37,7 +37,7 @@ namespace SchoolManagerWeb
                 .AddIdentityCookies();
 
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-            builder.Services.AddDbContext<SchoolDbContext>(options =>
+            builder.Services.AddDbContext<ApplicationDbContext>(options =>
             {
                 options.UseNpgsql(connectionString); // Use Npgsql for PostgreSQL
             });
@@ -45,7 +45,7 @@ namespace SchoolManagerWeb
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
             builder.Services.AddIdentityCore<ApplicationUser>(/*options => options.SignIn.RequireConfirmedAccount = true*/)
-                .AddEntityFrameworkStores<SchoolDbContext>()
+                .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddSignInManager()
                 .AddDefaultTokenProviders();
 

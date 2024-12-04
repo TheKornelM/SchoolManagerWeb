@@ -1,4 +1,4 @@
-﻿@page "/Account/ExternalLogin"
+@page "/Account/ExternalLogin"
 
 @using System.ComponentModel.DataAnnotations
 @using System.Security.Claims
@@ -8,10 +8,10 @@
 @using Microsoft.AspNetCore.WebUtilities
 @using SchoolManagerWeb.Data
 
-@inject SignInManager<ApplicationUser> SignInManager
-@inject UserManager<ApplicationUser> UserManager
-@inject IUserStore<ApplicationUser> UserStore
-@inject IEmailSender<ApplicationUser> EmailSender
+@inject SignInManager<User> SignInManager
+@inject UserManager<User> UserManager
+@inject IUserStore<User> UserStore
+@inject IEmailSender<User> EmailSender
 @inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
 @inject ILogger<ExternalLogin> Logger
@@ -35,8 +35,8 @@
             <DataAnnotationsValidator />
             <ValidationSummary class="text-danger" role="alert" />
             <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.Email" id="Input.Email" class="form-control" autocomplete="email" placeholder="Please enter your email." />
-                <label for="Input.Email" class="form-label">Email</label>
+                <InputText @bind-Value="Input.Email" class="form-control" autocomplete="email" placeholder="Please enter your email." />
+                <label for="email" class="form-label">Email</label>
                 <ValidationMessage For="() => Input.Email" />
             </div>
             <button type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
@@ -48,7 +48,7 @@
     public const string LoginCallbackAction = "LoginCallback";
 
     private string? message;
-    private ExternalLoginInfo? externalLoginInfo;
+    private ExternalLoginInfo externalLoginInfo = default!;
 
     [CascadingParameter]
     private HttpContext HttpContext { get; set; } = default!;
@@ -65,7 +65,7 @@
     [SupplyParameterFromQuery]
     private string? Action { get; set; }
 
-    private string? ProviderDisplayName => externalLoginInfo?.ProviderDisplayName;
+    private string? ProviderDisplayName => externalLoginInfo.ProviderDisplayName;
 
     protected override async Task OnInitializedAsync()
     {
@@ -98,11 +98,6 @@
 
     private async Task OnLoginCallbackAsync()
     {
-        if (externalLoginInfo is null)
-        {
-            RedirectManager.RedirectToWithStatus("Account/Login", "Error loading external login information.", HttpContext);
-        }
-
         // Sign in the user with this external login provider if the user already has a login.
         var result = await SignInManager.ExternalLoginSignInAsync(
             externalLoginInfo.LoginProvider,
@@ -132,11 +127,6 @@
 
     private async Task OnValidSubmitAsync()
     {
-        if (externalLoginInfo is null)
-        {
-            RedirectManager.RedirectToWithStatus("Account/Login", "Error loading external login information during confirmation.", HttpContext);
-        }
-
         var emailStore = GetEmailStore();
         var user = CreateUser();
 
@@ -174,26 +164,26 @@
         message = $"Error: {string.Join(",", result.Errors.Select(error => error.Description))}";
     }
 
-    private ApplicationUser CreateUser()
+    private User CreateUser()
     {
         try
         {
-            return Activator.CreateInstance<ApplicationUser>();
+            return Activator.CreateInstance<User>();
         }
         catch
         {
-            throw new InvalidOperationException($"Can't create an instance of '{nameof(ApplicationUser)}'. " +
-                $"Ensure that '{nameof(ApplicationUser)}' is not an abstract class and has a parameterless constructor");
+            throw new InvalidOperationException($"Can't create an instance of '{nameof(User)}'. " +
+                $"Ensure that '{nameof(User)}' is not an abstract class and has a parameterless constructor");
         }
     }
 
-    private IUserEmailStore<ApplicationUser> GetEmailStore()
+    private IUserEmailStore<User> GetEmailStore()
     {
         if (!UserManager.SupportsUserEmail)
         {
             throw new NotSupportedException("The default UI requires a user store with email support.");
         }
-        return (IUserEmailStore<ApplicationUser>)UserStore;
+        return (IUserEmailStore<User>)UserStore;
     }
 
     private sealed class InputModel

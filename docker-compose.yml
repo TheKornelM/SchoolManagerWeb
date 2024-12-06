@@ -5,9 +5,9 @@ services:
     image: postgres:14-alpine
     restart: always
     environment:
-      - POSTGRES_USER=yourusername
+      - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=yourpassword
-      - POSTGRES_DB=schoolmanagerdb
+      - POSTGRES_DB=postgres
     ports:
       - "5432:5432"
     volumes:

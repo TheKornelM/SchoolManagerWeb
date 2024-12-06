@@ -12,8 +12,8 @@ using SchoolManagerWeb.Data;
 namespace SchoolManagerWeb.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241204135659_2024-12-04_03")]
-    partial class _20241204_03
+    [Migration("20241206120359_InitialMigration")]
+    partial class InitialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

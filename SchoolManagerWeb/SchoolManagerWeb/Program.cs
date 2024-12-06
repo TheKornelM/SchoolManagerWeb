@@ -29,7 +29,6 @@ namespace SchoolManagerWeb
             builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
             StaticWebAssetsLoader.UseStaticWebAssets(builder.Environment, builder.Configuration);
 
-
             builder.Services.AddAuthentication(options =>
             {
                 options.DefaultScheme = IdentityConstants.ApplicationScheme;
@@ -40,17 +39,17 @@ namespace SchoolManagerWeb
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
             builder.Services.AddDbContext<SchoolDbContext>(options =>
             {
-                options.UseSqlServer(connectionString);
+                options.UseNpgsql(connectionString); // Use Npgsql for PostgreSQL
             });
 
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-            builder.Services.AddIdentityCore<ApplicationUser>(/*options => options.SignIn.RequireConfirmedAccount = true*/)
+            builder.Services.AddIdentityCore<User>(/*options => options.SignIn.RequireConfirmedAccount = true*/)
                 .AddEntityFrameworkStores<SchoolDbContext>()
                 .AddSignInManager()
                 .AddDefaultTokenProviders();
 
-            builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+            builder.Services.AddSingleton<IEmailSender<User>, IdentityNoOpEmailSender>();
 
             var app = builder.Build();
 
@@ -67,8 +66,6 @@ namespace SchoolManagerWeb
                 app.UseHsts();
             }
 
-
-
             app.UseHttpsRedirection();
 
             app.UseAntiforgery();
@@ -81,7 +78,6 @@ namespace SchoolManagerWeb
 
             // Add additional endpoints required by the Identity /Account Razor components.
             app.MapAdditionalIdentityEndpoints();
-
 
             app.Run();
         }

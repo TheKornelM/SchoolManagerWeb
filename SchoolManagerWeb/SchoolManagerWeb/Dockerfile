@@ -11,11 +11,18 @@ EXPOSE 443
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
+
+# Install dotnet-ef tool
+RUN dotnet tool install --global dotnet-ef
+ENV PATH="$PATH:/root/.dotnet/tools"
+
+# Copy project files and restore dependencies
 COPY ["SchoolManagerWeb/SchoolManagerWeb/SchoolManagerWeb.csproj", "SchoolManagerWeb/SchoolManagerWeb/"]
 COPY ["SchoolManagerModel/SchoolManagerModel/SchoolManagerModel.csproj", "SchoolManagerModel/SchoolManagerModel/"]
 COPY ["SchoolManagerWeb/SchoolManagerWeb.Client/SchoolManagerWeb.Client.csproj", "SchoolManagerWeb/SchoolManagerWeb.Client/"]
 RUN dotnet restore "./SchoolManagerWeb/SchoolManagerWeb/SchoolManagerWeb.csproj"
 COPY . .
+
 WORKDIR "/src/SchoolManagerWeb/SchoolManagerWeb"
 RUN dotnet build "./SchoolManagerWeb.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
@@ -25,7 +32,15 @@ ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "./SchoolManagerWeb.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 # This stage is used in production or when running from VS in regular mode (Default when not using the Debug configuration)
-FROM base AS final
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+
+# Install dotnet-ef tool in the final stage
+RUN dotnet tool install --global dotnet-ef
+ENV PATH="$PATH:/root/.dotnet/tools"
+
+# Run migrations if the database is not up to date
+CMD ["bash", "-c", "dotnet ef database update || dotnet ef migrations add InitialCreate && dotnet ef database update"]
+
 ENTRYPOINT ["dotnet", "SchoolManagerWeb.dll"]

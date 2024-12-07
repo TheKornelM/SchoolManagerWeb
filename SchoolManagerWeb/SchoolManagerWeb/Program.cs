@@ -57,6 +57,7 @@ namespace SchoolManagerWeb
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
             builder.Services.AddIdentityCore<User>(/*options => options.SignIn.RequireConfirmedAccount = true*/)
+                .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<SchoolDbContext>()
                 .AddSignInManager()
                 .AddDefaultTokenProviders();

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Hosting.StaticWebAssets;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using SchoolManagerModel.Entities.UserModel;
+using SchoolManagerModel.Managers;
 using SchoolManagerModel.Persistence;
 using SchoolManagerWeb.Components;
 using SchoolManagerWeb.Components.Account;
@@ -41,6 +42,17 @@ namespace SchoolManagerWeb
             {
                 options.UseNpgsql(connectionString); // Use Npgsql for PostgreSQL
             });
+
+            // Add SchoolManager service and repository classes
+            builder.Services.AddTransient<SchoolDbContextBase, SchoolDbContext>();
+            builder.Services.AddScoped<IAsyncClassDataHandler, ClassDatabase>();
+            builder.Services.AddScoped<IAsyncSubjectDataHandler, SubjectDatabase>();
+            builder.Services.AddScoped<IAsyncUserDataHandler, UserDatabase>();
+            builder.Services.AddScoped<IAsyncTeacherDataHandler, TeacherDatabase>();
+            builder.Services.AddScoped<UserManager>();
+            builder.Services.AddScoped<ClassManager>();
+            builder.Services.AddScoped<SubjectManager>();
+            builder.Services.AddScoped<TeacherManager>();
 
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
@@ -81,5 +93,8 @@ namespace SchoolManagerWeb
 
             app.Run();
         }
+
+
     }
+
 }

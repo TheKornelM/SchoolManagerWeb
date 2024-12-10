@@ -22,236 +22,282 @@
 <h1>Register</h1>
 
 <div class="row">
-    <div class="col-md-4">
-        <StatusMessage Message="@Message" />
-        <EditForm Model="Input" asp-route-returnUrl="@ReturnUrl" method="post" OnValidSubmit="RegisterUser" FormName="register">
-            <DataAnnotationsValidator />
-            <h2>Create a new account.</h2>
-            <hr />
-            <ValidationSummary class="text-danger" role="alert" />
+	<div class="col-md-4">
+		<StatusMessage Message="@Message" />
+		<EditForm Model="Input" asp-route-returnUrl="@ReturnUrl" method="post" OnValidSubmit="RegisterUser" FormName="register">
+			<DataAnnotationsValidator />
+			<h2>Create a new account.</h2>
+			<hr />
+			<ValidationSummary class="text-danger" role="alert" />
 
-            <!-- Username -->
-            <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.Username" class="form-control" autocomplete="username" placeholder="Username" />
-                <label>Username</label>
-                <ValidationMessage For="() => Input.Username" class="text-danger" />
-            </div>
+			<!-- Username -->
+			<div class="form-floating mb-3">
+				<InputText @bind-Value="Input.Username" class="form-control" autocomplete="username" placeholder="Username" />
+				<label>Username</label>
+				<ValidationMessage For="() => Input.Username" class="text-danger" />
+			</div>
 
-            <!-- Email -->
-            <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.Email" class="form-control" autocomplete="email" placeholder="Email" />
-                <label>Email</label>
-                <ValidationMessage For="() => Input.Email" class="text-danger" />
-            </div>
+			<!-- Email -->
+			<div class="form-floating mb-3">
+				<InputText @bind-Value="Input.Email" class="form-control" autocomplete="email" placeholder="Email" />
+				<label>Email</label>
+				<ValidationMessage For="() => Input.Email" class="text-danger" />
+			</div>
 
-            <!-- First Name -->
-            <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.FirstName" class="form-control" autocomplete="given-name" placeholder="First Name" />
-                <label>First Name</label>
-                <ValidationMessage For="() => Input.FirstName" class="text-danger" />
-            </div>
+			<!-- First Name -->
+			<div class="form-floating mb-3">
+				<InputText @bind-Value="Input.FirstName" class="form-control" autocomplete="given-name" placeholder="First Name" />
+				<label>First Name</label>
+				<ValidationMessage For="() => Input.FirstName" class="text-danger" />
+			</div>
 
-            <!-- Last Name -->
-            <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.LastName" class="form-control" autocomplete="family-name" placeholder="Last Name" />
-                <label>Last Name</label>
-                <ValidationMessage For="() => Input.LastName" class="text-danger" />
-            </div>
+			<!-- Last Name -->
+			<div class="form-floating mb-3">
+				<InputText @bind-Value="Input.LastName" class="form-control" autocomplete="family-name" placeholder="Last Name" />
+				<label>Last Name</label>
+				<ValidationMessage For="() => Input.LastName" class="text-danger" />
+			</div>
 
-            <!-- Password -->
-            <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.Password" class="form-control" autocomplete="new-password" type="password" placeholder="Password" />
-                <label>Password</label>
-                <ValidationMessage For="() => Input.Password" class="text-danger" />
-            </div>
+			<!-- Password -->
+			<div class="form-floating mb-3">
+				<InputText @bind-Value="Input.Password" class="form-control" autocomplete="new-password" type="password" placeholder="Password" />
+				<label>Password</label>
+				<ValidationMessage For="() => Input.Password" class="text-danger" />
+			</div>
 
-            <!-- Confirm Password -->
-            <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.ConfirmPassword" class="form-control" autocomplete="new-password" type="password" placeholder="Confirm Password" />
-                <label>Confirm Password</label>
-                <ValidationMessage For="() => Input.ConfirmPassword" class="text-danger" />
-            </div>
+			<!-- Confirm Password -->
+			<div class="form-floating mb-3">
+				<InputText @bind-Value="Input.ConfirmPassword" class="form-control" autocomplete="new-password" type="password" placeholder="Confirm Password" />
+				<label>Confirm Password</label>
+				<ValidationMessage For="() => Input.ConfirmPassword" class="text-danger" />
+			</div>
 
-            <!-- Role Selection -->
-            <div class="mb-3">
-                <label>Role</label>
-                <select @bind="Input.Role" class="form-select">
-                    <option value="Student">Student</option>
-                    <option value="Teacher">Teacher</option>
-                    <option value="Administrator">Administrator</option>
-                </select>
-                <ValidationMessage For="() => Input.Role" class="text-danger" />
-            </div>
+			<!-- Role -->
+			<div class="mb-3">
+				<label>Role</label>
+				<InputSelect @bind-value="Input.Role" @bind:event="onchange">
+					<option value="Student">Student</option>
+					<option value="Teacher">Teacher</option>
+					<option value="Administrator">Administrator</option>
+				</InputSelect>
+				<ValidationMessage For="() => Input.Role" class="text-danger" />
+			</div>
 
-            <!-- Class Selection (if Student) -->
-            @if (Input.Role == "Student")
-            {
-                <div class="mb-3">
-                    <label>Class</label>
-                    <select @bind="SelectedClassId" class="form-select">
-                        <option value="">Select Class</option>
-                        @foreach (var cls in Classes)
-                        {
-                            <option value="@cls.Id">@cls.Name</option>
-                        }
-                    </select>
-                    <ValidationMessage For="() => SelectedClassId" class="text-danger" />
-                </div>
 
-                <!-- Subjects Selection (if Class selected) -->
-                @if (!string.IsNullOrEmpty(SelectedClassId))
-                {
-                    <div class="mb-3">
-                        <label>Subjects</label>
-                        @foreach (var subject in Subjects)
-                        {
-                            <div>
-                                <input type="checkbox" @bind="subject.IsSelected" />
-                                <span>@subject.Name</span>
-                            </div>
-                        }
-                    </div>
-                }
-            }
+			<!-- Class Selection (if Student) -->
+			@if (Input.Role == "Student")
+			{
+				<div class="mb-3">
+					<label>Class</label>
+					<InputSelect @bind-value="SelectedClassId" @bind:event="onchange">
+						<option value="">Select Class</option>
+						@foreach (var cls in Classes)
+						{
+							<option value="@cls.Id">@cls.Name</option>
+						}
+					</InputSelect>
+					<ValidationMessage For="() => SelectedClassId" class="text-danger" />
+				</div>
 
-            <button type="submit" class="btn btn-primary w-100">Register</button>
-        </EditForm>
-    </div>
+				<!-- Subjects Selection -->
+				@if (!string.IsNullOrEmpty(SelectedClassId))
+				{
+					<div class="mb-3">
+						<label>Subjects</label>
+						@foreach (var subject in Subjects)
+						{
+							<div>
+								<input type="checkbox" @bind="subject.IsSelected" />
+								<span>@subject.Name</span>
+							</div>
+						}
+					</div>
+				}
+			}
+
+
+			<button type="submit" class="btn btn-primary w-100">Register</button>
+		</EditForm>
+	</div>
 </div>
 
 @code {
-    [SupplyParameterFromForm]
-    private InputModel Input { get; set; } = new();
-    private List<Class> Classes { get; set; } = new();
-    private List<SubjectSelection> Subjects { get; set; } = new();
-    private string? SelectedClassId { get; set; }
+	[SupplyParameterFromForm]
+	private InputModel Input { get; set; } = new();
+	private List<Class> Classes { get; set; } = new();
+	private List<SubjectSelection> Subjects { get; set; } = new();
+	private string? SelectedClassId { get; set; }
 
-    private string? Message => identityErrors is null ? null : $"Error: {string.Join(", ", identityErrors.Select(error => error.Description))}";
-    private IEnumerable<IdentityError>? identityErrors;
+	private string? Message => identityErrors is null ? null : $"Error: {string.Join(", ", identityErrors.Select(error => error.Description))}";
+	private IEnumerable<IdentityError>? identityErrors;
 
-    [SupplyParameterFromQuery]
-    private string? ReturnUrl { get; set; }
+	[SupplyParameterFromQuery]
+	private string? ReturnUrl { get; set; }
 
-    protected override async Task OnInitializedAsync()
-    {
-        Classes = await ClassManager.GetClassesAsync();
-    }
+	protected override async Task OnInitializedAsync()
+	{
+		Classes = await ClassManager.GetClassesAsync();
+	}
 
-    private async Task RegisterUser(EditContext editContext)
-    {
-        if (Input.Role == "Student" && string.IsNullOrEmpty(SelectedClassId))
-        {
-            identityErrors = new[] { new IdentityError { Description = "Students must select a class." } };
-            return;
-        }
+	private async Task RegisterUser(EditContext editContext)
+	{
+		if (Input.Role == "Student" && string.IsNullOrEmpty(SelectedClassId))
+		{
+			identityErrors = new[] { new IdentityError { Description = "Students must select a class." } };
+			return;
+		}
 
-        var user = CreateUser();
-        await UserManager.SetUserNameAsync(user, Input.Username);
-        user.FirstName = Input.FirstName;
-        user.LastName = Input.LastName;
+		var user = CreateUser();
+		await UserManager.SetUserNameAsync(user, Input.Username);
+		user.FirstName = Input.FirstName;
+		user.LastName = Input.LastName;
 
-        var emailStore = GetEmailStore();
-        await emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
+		var emailStore = GetEmailStore();
+		await emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
 
-        var result = await UserManager.CreateAsync(user, Input.Password);
-        if (!result.Succeeded)
-        {
-            identityErrors = result.Errors;
-            return;
-        }
+		var result = await UserManager.CreateAsync(user, Input.Password);
+		if (!result.Succeeded)
+		{
+			identityErrors = result.Errors;
+			return;
+		}
 
-        Logger.LogInformation("User created a new account with password.");
+		Logger.LogInformation("User created a new account with password.");
 
-        await UserManager.AddToRoleAsync(user, "Admin");
-        //await UserManager.AssignRoleAsync(user, StringRoleConverter.GetRole("Admin"));
+		Console.WriteLine("Input.Role:" + Input.Role);
+		await UserManager.AddToRoleAsync(user, Input.Role);
+		//await UserManager.AssignRoleAsync(user, StringRoleConverter.GetRole("Admin"));
 
-        if (Input.Role == "Student" && !string.IsNullOrEmpty(SelectedClassId))
-        {
-            var selectedClass = Classes.First(cls => cls.Id == int.Parse(SelectedClassId));
-            var selectedSubjects = Subjects.Where(s => s.IsSelected).Select(s => s.Id).ToList();
-           // await ClassManager.AssignStudentToClassAsync(user, selectedClass, selectedSubjects);
-        }
+		if (Input.Role == "Student" && !string.IsNullOrEmpty(SelectedClassId))
+		{
+			var selectedClass = Classes.First(cls => cls.Id == int.Parse(SelectedClassId));
+			var selectedSubjects = Subjects.Where(s => s.IsSelected).Select(s => s.Id).ToList();
+			// await ClassManager.AssignStudentToClassAsync(user, selectedClass, selectedSubjects);
+		}
 
-        var userId = await UserManager.GetUserIdAsync(user);
-        var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
-        code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-        var callbackUrl = NavigationManager.GetUriWithQueryParameters(
-            NavigationManager.ToAbsoluteUri("Account/ConfirmEmail").AbsoluteUri,
-            new Dictionary<string, object?> { ["userId"] = userId, ["code"] = code, ["returnUrl"] = ReturnUrl });
+		var userId = await UserManager.GetUserIdAsync(user);
+		var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
+		code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+		var callbackUrl = NavigationManager.GetUriWithQueryParameters(
+			NavigationManager.ToAbsoluteUri("Account/ConfirmEmail").AbsoluteUri,
+			new Dictionary<string, object?> { ["userId"] = userId, ["code"] = code, ["returnUrl"] = ReturnUrl });
 
-        await EmailSender.SendConfirmationLinkAsync(user, Input.Email, HtmlEncoder.Default.Encode(callbackUrl));
+		await EmailSender.SendConfirmationLinkAsync(user, Input.Email, HtmlEncoder.Default.Encode(callbackUrl));
 
 
 
-        if (UserManager.Options.SignIn.RequireConfirmedAccount)
-        {
-            RedirectManager.RedirectTo(
-                "Account/RegisterConfirmation",
-                new() { ["email"] = Input.Email, ["returnUrl"] = ReturnUrl });
-        }
+		if (UserManager.Options.SignIn.RequireConfirmedAccount)
+		{
+			RedirectManager.RedirectTo(
+				"Account/RegisterConfirmation",
+				new() { ["email"] = Input.Email, ["returnUrl"] = ReturnUrl });
+		}
 
-        await SignInManager.SignInAsync(user, isPersistent: false);
-        RedirectManager.RedirectTo(ReturnUrl);
-    }
+		await SignInManager.SignInAsync(user, isPersistent: false);
+		RedirectManager.RedirectTo(ReturnUrl);
+	}
 
-    private User CreateUser()
-    {
-        try
-        {
-            return Activator.CreateInstance<User>();
-        }
-        catch
-        {
-            throw new InvalidOperationException($"Can't create an instance of '{nameof(User)}'. Ensure it's not abstract and has a parameterless constructor.");
-        }
-    }
+	private User CreateUser()
+	{
+		try
+		{
+			return Activator.CreateInstance<User>();
+		}
+		catch
+		{
+			throw new InvalidOperationException($"Can't create an instance of '{nameof(User)}'. Ensure it's not abstract and has a parameterless constructor.");
+		}
+	}
 
-    private IUserEmailStore<User> GetEmailStore()
-    {
-        if (!UserManager.SupportsUserEmail)
-        {
-            throw new NotSupportedException("The default UI requires a user store with email support.");
-        }
-        return (IUserEmailStore<User>)UserStore;
-    }
+	private IUserEmailStore<User> GetEmailStore()
+	{
+		if (!UserManager.SupportsUserEmail)
+		{
+			throw new NotSupportedException("The default UI requires a user store with email support.");
+		}
+		return (IUserEmailStore<User>)UserStore;
+	}
 
-    private class InputModel
-    {
-        [Required]
-        [Display(Name = "Username")]
-        public string Username { get; set; } = "";
+	private class InputModel
+	{
+		[Required]
+		[Display(Name = "Username")]
+		public string Username { get; set; } = "";
 
-        [Required]
-        [EmailAddress]
-        [Display(Name = "Email")]
-        public string Email { get; set; } = "";
+		[Required]
+		[EmailAddress]
+		[Display(Name = "Email")]
+		public string Email { get; set; } = "";
 
-        [Required]
-        [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
-        [DataType(DataType.Password)]
-        [Display(Name = "Password")]
-        public string Password { get; set; } = "";
+		[Required]
+		[StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
+		[DataType(DataType.Password)]
+		[Display(Name = "Password")]
+		public string Password { get; set; } = "";
 
-        [DataType(DataType.Password)]
-        [Display(Name = "Confirm password")]
-        [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
-        public string ConfirmPassword { get; set; } = "";
+		[DataType(DataType.Password)]
+		[Display(Name = "Confirm password")]
+		[Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
+		public string ConfirmPassword { get; set; } = "";
 
-        [Required]
-        [Display(Name = "First name")]
-        public string FirstName { get; set; } = "";
+		[Required]
+		[Display(Name = "First name")]
+		public string FirstName { get; set; } = "";
 
-        [Required]
-        [Display(Name = "Last name")]
-        public string LastName { get; set; } = "";
+		[Required]
+		[Display(Name = "Last name")]
+		public string LastName { get; set; } = "";
 
-        public string Role { get; set; } = "Student";
-    }
+		[Required]
+		[Display(Name = "Role")]
+		public string Role { get; set; }
+	}
 
-    private class SubjectSelection
-    {
-        public string Id { get; set; } = string.Empty;
-        public string Name { get; set; } = string.Empty;
-        public bool IsSelected { get; set; }
-    }
+	private class SubjectSelection
+	{
+		public string Id { get; set; } = string.Empty;
+		public string Name { get; set; } = string.Empty;
+		public bool IsSelected { get; set; }
+	}
+
+	private async Task RoleChanged()
+	{
+		if (!string.IsNullOrEmpty(Input.Role))
+		{
+			if (Input.Role == "Student")
+			{
+				SelectedClassId = null;
+				Subjects.Clear();
+				Classes = await ClassManager.GetClassesAsync();
+			}
+			else
+			{
+				SelectedClassId = null;
+				Subjects.Clear();
+				Classes.Clear();
+			}
+		}
+	}
+
+	private async Task ClassChanged()
+	{
+		if (!string.IsNullOrEmpty(SelectedClassId))
+		{
+			//Subjects = await ClassManager.GetSubjectsForClassAsync(int.Parse(SelectedClassId));
+		}
+		else
+		{
+			Subjects.Clear();
+		}
+	}
+
+	private async Task OnRoleChanged(ChangeEventArgs e)
+	{
+		await RoleChanged();
+	}
+
+	private async Task OnClassChanged(ChangeEventArgs e)
+	{
+		await ClassChanged();
+	}
 }

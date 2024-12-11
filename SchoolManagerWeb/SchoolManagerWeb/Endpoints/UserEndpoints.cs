@@ -11,7 +11,7 @@ public static class UserEndpoints
 {
     public static WebApplication AddUserEndpoints(this WebApplication app)
     {
-        app.MapGet("hi", () => Results.Json("hello"));
+        app.MapGet("hi", () => Results.Json("hello")).RequireAuthorization("RequireAdminRole");
         app.MapPost("user", async (UserRegistrationDto userDto, UserManager userManager, ILogger<Register> logger, IUserStore<User> userStore, IEmailSender<User> emailSender, ClassManager classManager) =>
         {
             var user = new User()

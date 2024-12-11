@@ -9,7 +9,6 @@
 @using System.Text
 @using System.Text.Encodings.Web
 @inject SchoolManagerModel.Managers.UserManager UserManager
-@inject SignInManager<User> SignInManager
 @inject IEmailSender<User> EmailSender
 @inject ILogger<Register> Logger
 @inject NavigationManager NavigationManager
@@ -19,107 +18,115 @@
 
 <PageTitle>Register</PageTitle>
 
-<h1>Register</h1>
+<AuthorizeView Roles="Admin" Context="AuthContext">
+	<Authorized>
+	<h1>Register</h1>
 
-<div class="row">
-	<div class="col-md-4">
-		<StatusMessage Message="@Message" />
-		<EditForm Model="Input" asp-route-returnUrl="@ReturnUrl" method="post" OnValidSubmit="RegisterUser" FormName="register">
-			<DataAnnotationsValidator />
-			<h2>Create a new account.</h2>
-			<hr />
-			<ValidationSummary class="text-danger" role="alert" />
+	<div class="row">
+		<div class="col-md-4">
+			<StatusMessage Message="@Message" />
+			<EditForm Model="Input" asp-route-returnUrl="@ReturnUrl" method="post" OnValidSubmit="RegisterUser" FormName="register" Context="EditContext">
+				<DataAnnotationsValidator />
+				<h2>Create a new account.</h2>
+				<hr />
+				<ValidationSummary class="text-danger" role="alert" />
 
-			<!-- Username -->
-			<div class="form-floating mb-3">
-				<InputText @bind-Value="Input.Username" class="form-control" autocomplete="username" placeholder="Username" />
-				<label>Username</label>
-				<ValidationMessage For="() => Input.Username" class="text-danger" />
-			</div>
-
-			<!-- Email -->
-			<div class="form-floating mb-3">
-				<InputText @bind-Value="Input.Email" class="form-control" autocomplete="email" placeholder="Email" />
-				<label>Email</label>
-				<ValidationMessage For="() => Input.Email" class="text-danger" />
-			</div>
-
-			<!-- First Name -->
-			<div class="form-floating mb-3">
-				<InputText @bind-Value="Input.FirstName" class="form-control" autocomplete="given-name" placeholder="First Name" />
-				<label>First Name</label>
-				<ValidationMessage For="() => Input.FirstName" class="text-danger" />
-			</div>
-
-			<!-- Last Name -->
-			<div class="form-floating mb-3">
-				<InputText @bind-Value="Input.LastName" class="form-control" autocomplete="family-name" placeholder="Last Name" />
-				<label>Last Name</label>
-				<ValidationMessage For="() => Input.LastName" class="text-danger" />
-			</div>
-
-			<!-- Password -->
-			<div class="form-floating mb-3">
-				<InputText @bind-Value="Input.Password" class="form-control" autocomplete="new-password" type="password" placeholder="Password" />
-				<label>Password</label>
-				<ValidationMessage For="() => Input.Password" class="text-danger" />
-			</div>
-
-			<!-- Confirm Password -->
-			<div class="form-floating mb-3">
-				<InputText @bind-Value="Input.ConfirmPassword" class="form-control" autocomplete="new-password" type="password" placeholder="Confirm Password" />
-				<label>Confirm Password</label>
-				<ValidationMessage For="() => Input.ConfirmPassword" class="text-danger" />
-			</div>
-
-			<!-- Role -->
-			<div class="mb-3">
-				<label>Role</label>
-				<InputSelect @bind-value="Input.Role" @bind:event="onchange">
-					<option value="Student">Student</option>
-					<option value="Teacher">Teacher</option>
-					<option value="Administrator">Administrator</option>
-				</InputSelect>
-				<ValidationMessage For="() => Input.Role" class="text-danger" />
-			</div>
-
-
-			<!-- Class Selection (if Student) -->
-			@if (Input.Role == "Student")
-			{
-				<div class="mb-3">
-					<label>Class</label>
-					<InputSelect @bind-value="SelectedClassId" @bind:event="onchange">
-						<option value="">Select Class</option>
-						@foreach (var cls in Classes)
-						{
-							<option value="@cls.Id">@cls.Name</option>
-						}
-					</InputSelect>
-					<ValidationMessage For="() => SelectedClassId" class="text-danger" />
+				<!-- Username -->
+				<div class="form-floating mb-3">
+					<InputText @bind-Value="Input.Username" class="form-control" autocomplete="username" placeholder="Username" />
+					<label>Username</label>
+					<ValidationMessage For="() => Input.Username" class="text-danger" />
 				</div>
 
-				<!-- Subjects Selection -->
-				@if (!string.IsNullOrEmpty(SelectedClassId))
+				<!-- Email -->
+				<div class="form-floating mb-3">
+					<InputText @bind-Value="Input.Email" class="form-control" autocomplete="email" placeholder="Email" />
+					<label>Email</label>
+					<ValidationMessage For="() => Input.Email" class="text-danger" />
+				</div>
+
+				<!-- First Name -->
+				<div class="form-floating mb-3">
+					<InputText @bind-Value="Input.FirstName" class="form-control" autocomplete="given-name" placeholder="First Name" />
+					<label>First Name</label>
+					<ValidationMessage For="() => Input.FirstName" class="text-danger" />
+				</div>
+
+				<!-- Last Name -->
+				<div class="form-floating mb-3">
+					<InputText @bind-Value="Input.LastName" class="form-control" autocomplete="family-name" placeholder="Last Name" />
+					<label>Last Name</label>
+					<ValidationMessage For="() => Input.LastName" class="text-danger" />
+				</div>
+
+				<!-- Password -->
+				<div class="form-floating mb-3">
+					<InputText @bind-Value="Input.Password" class="form-control" autocomplete="new-password" type="password" placeholder="Password" />
+					<label>Password</label>
+					<ValidationMessage For="() => Input.Password" class="text-danger" />
+				</div>
+
+				<!-- Confirm Password -->
+				<div class="form-floating mb-3">
+					<InputText @bind-Value="Input.ConfirmPassword" class="form-control" autocomplete="new-password" type="password" placeholder="Confirm Password" />
+					<label>Confirm Password</label>
+					<ValidationMessage For="() => Input.ConfirmPassword" class="text-danger" />
+				</div>
+
+				<!-- Role -->
+				<div class="mb-3">
+					<label>Role</label>
+					<InputSelect @bind-value="Input.Role" @bind:event="onchange">
+						<option value="Student">Student</option>
+						<option value="Teacher">Teacher</option>
+						<option value="Admin">Administrator</option>
+					</InputSelect>
+					<ValidationMessage For="() => Input.Role" class="text-danger" />
+				</div>
+
+
+				<!-- Class Selection (if Student) -->
+				@if (Input.Role == "Student")
 				{
 					<div class="mb-3">
-						<label>Subjects</label>
-						@foreach (var subject in Subjects)
-						{
-							<div>
-								<input type="checkbox" @bind="subject.IsSelected" />
-								<span>@subject.Name</span>
-							</div>
-						}
+						<label>Class</label>
+						<InputSelect @bind-value="SelectedClassId" @bind:event="onchange">
+							<option value="">Select Class</option>
+							@foreach (var cls in Classes)
+							{
+								<option value="@cls.Id">@cls.Name</option>
+							}
+						</InputSelect>
+						<ValidationMessage For="() => SelectedClassId" class="text-danger" />
 					</div>
+
+					<!-- Subjects Selection -->
+					@if (!string.IsNullOrEmpty(SelectedClassId))
+					{
+						<div class="mb-3">
+							<label>Subjects</label>
+							@foreach (var subject in Subjects)
+							{
+								<div>
+									<input type="checkbox" @bind="subject.IsSelected" />
+									<span>@subject.Name</span>
+								</div>
+							}
+						</div>
+					}
 				}
-			}
 
 
-			<button type="submit" class="btn btn-primary w-100">Register</button>
-		</EditForm>
+				<button type="submit" class="btn btn-primary w-100">Register</button>
+			</EditForm>
+		</div>
 	</div>
-</div>
+	</Authorized>
+	<NotAuthorized>
+		<h1>404 Not Found</h1>
+	</NotAuthorized>
+</AuthorizeView>
+
 
 @code {
 	[SupplyParameterFromForm]
@@ -193,7 +200,6 @@
 				new() { ["email"] = Input.Email, ["returnUrl"] = ReturnUrl });
 		}
 
-		await SignInManager.SignInAsync(user, isPersistent: false);
 		RedirectManager.RedirectTo(ReturnUrl);
 	}
 

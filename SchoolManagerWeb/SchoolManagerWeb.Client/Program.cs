@@ -12,6 +12,14 @@ namespace SchoolManagerWeb.Client
             builder.Services.AddCascadingAuthenticationState();
             builder.Services.AddAuthenticationStateDeserialization();
 
+            builder.Services.AddScoped(sp => new HttpClient
+            {
+                BaseAddress = new Uri("https://localhost/")
+            });
+
+            builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>());
+
+
             await builder.Build().RunAsync();
         }
     }

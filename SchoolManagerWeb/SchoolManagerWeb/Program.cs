@@ -7,6 +7,8 @@ using SchoolManagerModel.Managers;
 using SchoolManagerModel.Persistence;
 using SchoolManagerWeb.Components;
 using SchoolManagerWeb.Components.Account;
+using SchoolManagerWeb.Endpoints;
+
 
 namespace SchoolManagerWeb
 {
@@ -29,6 +31,12 @@ namespace SchoolManagerWeb
             builder.Services.AddScoped<IdentityRedirectManager>();
             builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
             StaticWebAssetsLoader.UseStaticWebAssets(builder.Environment, builder.Configuration);
+
+            builder.Services.AddAuthorization(options =>
+            {
+                options.AddPolicy("RequireAdminRole",
+                     policy => policy.RequireRole("Admin"));
+            });
 
             builder.Services.AddAuthentication(options =>
             {
@@ -53,6 +61,11 @@ namespace SchoolManagerWeb
             builder.Services.AddScoped<ClassManager>();
             builder.Services.AddScoped<SubjectManager>();
             builder.Services.AddScoped<TeacherManager>();
+            builder.Services.AddSwaggerGen();
+
+            builder.Services.AddHttpClient();
+            builder.Services.AddHttpClient("ServerAPI", client => client.BaseAddress = new Uri("https://localhost/"));
+            builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>());
 
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
@@ -71,6 +84,11 @@ namespace SchoolManagerWeb
             {
                 app.UseWebAssemblyDebugging();
                 app.UseMigrationsEndPoint();
+                app.UseSwagger();
+                app.UseSwaggerUI(c =>
+                {
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Blazor API V1");
+                });
             }
             else
             {
@@ -81,7 +99,6 @@ namespace SchoolManagerWeb
 
             app.UseHttpsRedirection();
 
-            app.UseAntiforgery();
 
             app.MapStaticAssets();
             app.MapRazorComponents<App>()
@@ -91,6 +108,10 @@ namespace SchoolManagerWeb
 
             // Add additional endpoints required by the Identity /Account Razor components.
             app.MapAdditionalIdentityEndpoints();
+            app.AddUserEndpoints();
+
+            app.UseAntiforgery();
+
 
             app.Run();
         }

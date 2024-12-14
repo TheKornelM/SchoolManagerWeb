@@ -48,7 +48,47 @@ namespace SchoolManagerWeb
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
             builder.Services.AddDbContext<SchoolDbContext>(options =>
             {
-                options.UseNpgsql(connectionString); // Use Npgsql for PostgreSQL
+                options.UseNpgsql(connectionString);
+                options.UseSeeding((context, _) =>
+                {
+                    // Return if account exists with "1" ID (admin)
+                    if (context.Set<User>().Any(x => x.Id == "1"))
+                    {
+                        return;
+                    }
+
+                    // Add admin user
+                    var hasher = new PasswordHasher<User>();
+                    var adminUser = new User()
+                    {
+                        Id = "1",
+                        UserName = "admin",
+                        Email = "admin@admin.admin",
+                        NormalizedEmail = "ADMIN@ADMIN.ADMIN",
+                        NormalizedUserName = "ADMIN",
+                        FirstName = "admin",
+                        LastName = "admin"
+                    };
+                    adminUser.PasswordHash = hasher.HashPassword(adminUser, "admin");
+                    context.Set<User>().Add(adminUser);
+
+                    // Add to admin table
+                    var admin = new Admin()
+                    {
+                        Id = 1,
+                        User = adminUser
+                    };
+                    context.Set<Admin>().Add(admin);
+
+                    // Assign role
+                    context.Set<IdentityUserRole<string>>().Add(new IdentityUserRole<string>()
+                    {
+                        RoleId = "1",
+                        UserId = "1",
+                    });
+
+                    context.SaveChanges();
+                });
             });
 
             // Add SchoolManager service and repository classes
@@ -61,7 +101,14 @@ namespace SchoolManagerWeb
             builder.Services.AddScoped<ClassManager>();
             builder.Services.AddScoped<SubjectManager>();
             builder.Services.AddScoped<TeacherManager>();
-            builder.Services.AddSwaggerGen();
+            /*builder.Services.AddSwaggerGen(options =>
+            {
+                options.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Title = "SchoolManagerWeb",
+                    Version = "v1"
+                });
+            });*/
 
             builder.Services.AddHttpClient();
             builder.Services.AddHttpClient("ServerAPI", client => client.BaseAddress = new Uri("https://localhost/"));
@@ -69,7 +116,11 @@ namespace SchoolManagerWeb
 
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-            builder.Services.AddIdentityCore<User>(/*options => options.SignIn.RequireConfirmedAccount = true*/)
+            builder.Services.AddIdentityCore<User>(options =>
+            {
+                //options.SignIn.RequireConfirmedAccount = true;
+                options.User.RequireUniqueEmail = true;
+            })
                 .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<SchoolDbContext>()
                 .AddSignInManager()
@@ -84,11 +135,11 @@ namespace SchoolManagerWeb
             {
                 app.UseWebAssemblyDebugging();
                 app.UseMigrationsEndPoint();
-                app.UseSwagger();
+                /*app.UseSwagger();
                 app.UseSwaggerUI(c =>
                 {
                     c.SwaggerEndpoint("/swagger/v1/swagger.json", "Blazor API V1");
-                });
+                });*/
             }
             else
             {

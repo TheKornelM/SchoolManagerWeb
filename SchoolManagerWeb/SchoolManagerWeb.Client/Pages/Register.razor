@@ -1,15 +1,5 @@
 @page "/Register"
-@using System.Runtime.InteropServices
 @rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
-
-@using System.ComponentModel.DataAnnotations
-@using Microsoft.AspNetCore.Identity
-@using SchoolManagerModel.Entities.UserModel
-@using SchoolManagerModel.Managers
-@using SchoolManagerModel.Entities
-@using SchoolManagerModel.Utils
-@using System.Text
-@using System.Text.Encodings.Web
 
 @inject NavigationManager NavigationManager
 
@@ -17,7 +7,7 @@
 
 <AuthorizeView Roles="Admin" Context="AuthContext">
 	<Authorized>
-		<h1>Regisztr·ciÛ (SSR)</h1>
+		<h1>Regisztr√°ci√≥ (SSR)</h1>
 
 		<div class="row">
 			<div class="col-md-4">

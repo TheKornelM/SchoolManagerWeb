@@ -60,6 +60,7 @@ public partial class Register
                 // Read and display the response content
                 var responseContent = await response.Content.ReadAsStringAsync();
                 Message = $"Success: {responseContent}";
+                Input = new InputModel();
             }
             else
             {

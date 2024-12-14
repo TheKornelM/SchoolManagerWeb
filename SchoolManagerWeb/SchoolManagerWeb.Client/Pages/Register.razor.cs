@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Identity;
+using Radzen;
 using SchoolManagerModel.DTOs;
 using SchoolManagerModel.Entities;
 
@@ -12,12 +13,15 @@ public partial class Register
     private IEnumerable<IdentityError>? identityErrors;
 
     [Inject] public required HttpClient HttpClient { get; set; }
+    [Inject] public required NotificationService NotificationService { get; set; }
 
     [SupplyParameterFromForm] private UserRegistrationDto Input { get; set; } = new();
 
     private List<Class> Classes { get; set; } = [];
     private List<SelectSubjectDto> Subjects { get; set; } = [];
     private string? Message { get; set; }
+
+    private bool ClassesAreLoading { get; set; } = false;
 
     private List<int> SelectedSubjects => Subjects
         .Where(x => x.IsSelected)
@@ -29,7 +33,7 @@ public partial class Register
     protected override async Task OnInitializedAsync()
     {
         //Classes = await ClassManager.GetClassesAsync();
-        AttachEventHandler();
+        AttachEventHandlers();
     }
 
     private async Task RegisterUser(EditContext editContext)
@@ -45,7 +49,11 @@ public partial class Register
         //var client = HttpClientFactory.CreateClient("ServerAPI");
         try
         {
-            // Make the API call
+            if (Input.Role == "Student")
+            {
+                Input.AssignedSubjects = SelectedSubjects;
+            }
+
             var response = await HttpClient.PostAsJsonAsync("user", Input);
 
             // Check if the response indicates success
@@ -53,15 +61,31 @@ public partial class Register
             {
                 // Read and display the response content
                 var responseContent = await response.Content.ReadAsStringAsync();
-                Message = $"Success: {responseContent}";
+                //essage = $"Success: {responseContent}";
+                NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Success,
+                    Summary = "Success",
+                    Detail = "You added user successfully",
+                    Duration = 4000,
+                    Style = "word-break:break-word"
+                });
                 Input = new UserRegistrationDto();
-                AttachEventHandler();
+                AttachEventHandlers();
             }
             else
             {
                 // Handle non-success responses
-                var errorContent = await response.Content.ReadAsStringAsync();
-                Message = $"Error: {response.StatusCode} - {errorContent}";
+                var errorContent = await response.Content.ReadFromJsonAsync<IdentityError[]>() ?? [];
+                NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Failure",
+                    Detail = $"Error during user adding!\n{string.Join("\n", errorContent.Select(x => x.Description))}",
+                    Duration = 4000,
+                    Style = "word-break:break-word"
+                });
+                //Message = $"Error: {response.StatusCode} - {errorContent}";
             }
         }
         catch (Exception ex)
@@ -73,7 +97,7 @@ public partial class Register
         Console.WriteLine(Message); // Log the message for debugging
     }
 
-    private async void RoleChanged(object? sender, EventArgs e)
+    private async Task RoleChanged()
     {
         if (string.IsNullOrEmpty(Input.Role)) return;
 
@@ -81,7 +105,11 @@ public partial class Register
         {
             Input.AssignedClassId = null;
             Subjects.Clear();
+            ClassesAreLoading = true;
             Classes = await GetClassesAsync();
+            await Task.Delay(2000);
+            ClassesAreLoading = false;
+            StateHasChanged();
         }
         else
         {
@@ -91,7 +119,7 @@ public partial class Register
         }
     }
 
-    private async void ClassChanged(object? sender, EventArgs e)
+    private async Task ClassChanged()
     {
         if (Input.AssignedClassId == null)
         {
@@ -107,7 +135,7 @@ public partial class Register
 
     private async Task<List<Class>> GetClassesAsync()
     {
-        return
+        /*return
         [
             new Class
             {
@@ -119,7 +147,28 @@ public partial class Register
                 Id = 2,
                 Name = "Test"
             }
-        ];
+        ];*/
+        var response = await HttpClient.GetAsync("api/class");
+        //var response = HttpClient.GetFromJsonAsync<List<Class>>("api/class");
+
+        // Check if the response indicates success
+        if (!response.IsSuccessStatusCode)
+        {
+            // Handle non-success responses
+            var errorContent = await response.Content.ReadFromJsonAsync<string>();
+            NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Error,
+                Summary = "Failure",
+                Detail = errorContent,
+                Duration = 4000,
+                Style = "word-break:break-word"
+            });
+            //Message = $"Error: {response.StatusCode} - {errorContent}";
+        }
+
+        var classes = await response.Content.ReadFromJsonAsync<List<Class>>();
+        return classes ?? [];
     }
 
     private async Task<List<SelectSubjectDto>> GetSubjectsAsync()
@@ -149,10 +198,13 @@ public partial class Register
         ];
     }
 
-    private void AttachEventHandler()
+    private void AttachEventHandlers()
     {
-        Input.RoleModified += RoleChanged;
-        Input.RoleModified += ClassChanged;
-        Input.ClassModified += ClassChanged;
+        Input.RoleModified = async () =>
+        {
+            await RoleChanged();
+            await ClassChanged();
+        };
+        Input.ClassModified = async () => await ClassChanged();
     }
 }

@@ -2,12 +2,14 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Hosting.StaticWebAssets;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Radzen;
 using SchoolManagerModel.Entities.UserModel;
 using SchoolManagerModel.Managers;
 using SchoolManagerModel.Persistence;
 using SchoolManagerWeb.Components;
 using SchoolManagerWeb.Components.Account;
 using SchoolManagerWeb.Endpoints;
+using SchoolManagerWeb;
 
 
 namespace SchoolManagerWeb
@@ -35,17 +37,19 @@ namespace SchoolManagerWeb
             builder.Services.AddAuthorization(options =>
             {
                 options.AddPolicy("RequireAdminRole",
-                     policy => policy.RequireRole("Admin"));
+                    policy => policy.RequireRole("Admin"));
             });
 
             builder.Services.AddAuthentication(options =>
-            {
-                options.DefaultScheme = IdentityConstants.ApplicationScheme;
-                options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
-            })
+                {
+                    options.DefaultScheme = IdentityConstants.ApplicationScheme;
+                    options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
+                })
                 .AddIdentityCookies();
 
-            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ??
+                                   throw new InvalidOperationException(
+                                       "Connection string 'DefaultConnection' not found.");
             builder.Services.AddDbContext<SchoolDbContext>(options =>
             {
                 options.UseNpgsql(connectionString);
@@ -117,16 +121,22 @@ namespace SchoolManagerWeb
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
             builder.Services.AddIdentityCore<User>(options =>
-            {
-                //options.SignIn.RequireConfirmedAccount = true;
-                options.User.RequireUniqueEmail = true;
-            })
+                {
+                    //options.SignIn.RequireConfirmedAccount = true;
+                    options.User.RequireUniqueEmail = true;
+                })
                 .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<SchoolDbContext>()
                 .AddSignInManager()
                 .AddDefaultTokenProviders();
 
             builder.Services.AddSingleton<IEmailSender<User>, IdentityNoOpEmailSender>();
+            builder.Services.AddRadzenComponents();
+            builder.Services.AddScoped<NotificationService>();
+
+            builder.Services.AddEndpointsApiExplorer();
+
+            builder.Services.AddSwaggerGen();
 
             var app = builder.Build();
 
@@ -148,6 +158,14 @@ namespace SchoolManagerWeb
                 app.UseHsts();
             }
 
+            if (app.Environment.IsDevelopment())
+            {
+                app.UseSwagger();
+                app.UseSwaggerUI();
+            }
+
+            ;
+
             app.UseHttpsRedirection();
 
 
@@ -160,14 +178,11 @@ namespace SchoolManagerWeb
             // Add additional endpoints required by the Identity /Account Razor components.
             app.MapAdditionalIdentityEndpoints();
             app.AddUserEndpoints();
+            app.MapClassEndpoints();
 
             app.UseAntiforgery();
 
-
             app.Run();
         }
-
-
     }
-
 }

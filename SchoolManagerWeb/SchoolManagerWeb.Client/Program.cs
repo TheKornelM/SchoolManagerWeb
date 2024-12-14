@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using Radzen;
 
 namespace SchoolManagerWeb.Client
 {
@@ -18,6 +19,8 @@ namespace SchoolManagerWeb.Client
             });
 
             builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>());
+            builder.Services.AddRadzenComponents();
+            builder.Services.AddScoped<NotificationService>();
 
 
             await builder.Build().RunAsync();

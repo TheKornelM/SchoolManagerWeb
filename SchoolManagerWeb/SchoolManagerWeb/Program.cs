@@ -19,8 +19,10 @@ namespace SchoolManagerWeb
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-
             DotNetEnv.Env.Load();
+
+            builder.Configuration
+                .AddEnvironmentVariables();
 
             // Add services to the container.
             builder.Services.AddRazorComponents()
@@ -164,11 +166,7 @@ namespace SchoolManagerWeb
                 app.UseSwaggerUI();
             }
 
-            ;
-
             app.UseHttpsRedirection();
-
-
             app.MapStaticAssets();
             app.MapRazorComponents<App>()
                 .AddInteractiveServerRenderMode()

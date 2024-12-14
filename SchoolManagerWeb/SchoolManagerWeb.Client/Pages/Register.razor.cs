@@ -13,7 +13,7 @@ public partial class Register
     public required HttpClient HttpClient { get; set; }
 
     [SupplyParameterFromForm]
-    private InputModel Input { get; set; } = new();
+    private UserRegistrationDto Input { get; set; } = new();
     private List<Class> Classes { get; set; } = new();
     private List<SubjectSelection> Subjects { get; set; } = new();
     private string? SelectedClassId { get; set; } = null;
@@ -60,7 +60,7 @@ public partial class Register
                 // Read and display the response content
                 var responseContent = await response.Content.ReadAsStringAsync();
                 Message = $"Success: {responseContent}";
-                Input = new InputModel();
+                Input = new UserRegistrationDto();
             }
             else
             {
@@ -76,13 +76,6 @@ public partial class Register
         }
 
         Console.WriteLine(Message); // Log the message for debugging
-    }
-
-
-    private class InputModel : UserRegistrationDto
-    {
-
-
     }
 
     private class SubjectSelection

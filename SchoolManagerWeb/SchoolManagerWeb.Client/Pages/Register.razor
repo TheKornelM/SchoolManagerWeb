@@ -63,14 +63,13 @@
 					<!-- Role -->
 					<div class="mb-3">
 						<label>Role</label>
-						<InputSelect @bind-value="Input.Role"> 
-							<option value="Student" selected>Student</option>
+						<InputSelect @bind-Value="Input.Role">
+							<option value="" selected>Select role</option>
+							<option value="Student">Student</option>
 							<option value="Teacher">Teacher</option>
 							<option value="Admin">Administrator</option>
 						</InputSelect>
 						<ValidationMessage For="() => Input.Role" class="text-danger" />
-						<label>@Input.Role</label>
-
 					</div>
 
 					<!-- Class Selection (if Student) -->
@@ -84,20 +83,19 @@
 							}
 							else
 							{
-								<InputSelect @bind-value="SelectedClassId">
+								<InputSelect @bind-value="Input.AssignedClassId">
 									<option value="">Select Class</option>
-									<option value="123">Option</option>
 									@foreach (var cls in Classes)
 									{
 										<option value="@cls.Id">@cls.Name</option>
 									}
 								</InputSelect>
-								<ValidationMessage For="() => SelectedClassId" class="text-danger" />
+								<ValidationMessage For="() => Input.AssignedClassId" class="text-danger" />
 							}
 						</div>
 
 						<!-- Subjects Selection -->
-						@if (!string.IsNullOrEmpty(SelectedClassId))
+						@if (Input.AssignedClassId != null)
 						{
 							<div class="mb-3">
 								<label>Subjects</label>
@@ -113,6 +111,11 @@
 											<input type="checkbox" @bind="subject.IsSelected" />
 											<span>@subject.Name</span>
 										</div>
+									}
+									@if (SelectedSubjects.Count != 0)
+									{
+										<h2>Selected subjects</h2>
+										<p>@string.Join(',', SelectedSubjects)</p>
 									}
 								}
 							</div>

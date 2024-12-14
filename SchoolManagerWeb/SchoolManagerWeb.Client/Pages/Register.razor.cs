@@ -1,51 +1,45 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using System.Net.Http.Json;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Identity;
 using SchoolManagerModel.DTOs;
 using SchoolManagerModel.Entities;
-using System.Net.Http.Json;
 
 namespace SchoolManagerWeb.Client.Pages;
 
 public partial class Register
 {
-    [Inject]
-    public required HttpClient HttpClient { get; set; }
-
-    [SupplyParameterFromForm]
-    private UserRegistrationDto Input { get; set; } = new();
-    private List<Class> Classes { get; set; } = new();
-    private List<SubjectSelection> Subjects { get; set; } = new();
-    private string? SelectedClassId { get; set; } = null;
-
-    private string? Message { get; set; }
     private IEnumerable<IdentityError>? identityErrors;
 
-    [SupplyParameterFromQuery]
-    private string? ReturnUrl { get; set; }
+    [Inject] public required HttpClient HttpClient { get; set; }
+
+    [SupplyParameterFromForm] private UserRegistrationDto Input { get; set; } = new();
+
+    private List<Class> Classes { get; set; } = [];
+    private List<SelectSubjectDto> Subjects { get; set; } = [];
+    private string? Message { get; set; }
+
+    private List<int> SelectedSubjects => Subjects
+        .Where(x => x.IsSelected)
+        .Select(s => s.Id)
+        .ToList();
+
+    [SupplyParameterFromQuery] private string? ReturnUrl { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
         //Classes = await ClassManager.GetClassesAsync();
-        Classes = new List<Class>()
-        {
-            new Class()
-            {
-                Id = 1,
-                Name = "Test"
-            }
-        };
-
+        AttachEventHandler();
     }
 
     private async Task RegisterUser(EditContext editContext)
     {
         /*if (Input.Role == "Student" && string.IsNullOrEmpty(SelectedClassId))
-		{
-			identityErrors = new[] { new IdentityError { Description = "Students must select a class." } };
-			Message = identityErrors is null ? null : $"Error: {string.Join(", ", identityErrors.Select(error => error.Description))}";
-			return;
-		}*/
+        {
+            identityErrors = new[] { new IdentityError { Description = "Students must select a class." } };
+            Message = identityErrors is null ? null : $"Error: {string.Join(", ", identityErrors.Select(error => error.Description))}";
+            return;
+        }*/
 
         // API call:
         //var client = HttpClientFactory.CreateClient("ServerAPI");
@@ -61,6 +55,7 @@ public partial class Register
                 var responseContent = await response.Content.ReadAsStringAsync();
                 Message = $"Success: {responseContent}";
                 Input = new UserRegistrationDto();
+                AttachEventHandler();
             }
             else
             {
@@ -78,54 +73,86 @@ public partial class Register
         Console.WriteLine(Message); // Log the message for debugging
     }
 
-    private class SubjectSelection
+    private async void RoleChanged(object? sender, EventArgs e)
     {
-        public string Id { get; set; } = string.Empty;
-        public string Name { get; set; } = string.Empty;
-        public bool IsSelected { get; set; } = false;
-    }
+        if (string.IsNullOrEmpty(Input.Role)) return;
 
-    private async Task RoleChanged(ChangeEventArgs e)
-    {
-        Console.WriteLine("RoleChanged event");
-        if (!string.IsNullOrEmpty(Input.Role))
+        if (Input.Role == "Student")
         {
-            Console.WriteLine("ok");
-
-            if (Input.Role == "Student")
-            {
-                SelectedClassId = null;
-                Subjects.Clear();
-            }
-            else
-            {
-                SelectedClassId = null;
-                Subjects.Clear();
-                Classes.Clear();
-            }
-        }
-    }
-
-    private async Task ClassChanged()
-    {
-        if (!string.IsNullOrEmpty(SelectedClassId))
-        {
-            //Subjects = await ClassManager.GetSubjectsForClassAsync(int.Parse(SelectedClassId));
+            Input.AssignedClassId = null;
+            Subjects.Clear();
+            Classes = await GetClassesAsync();
         }
         else
         {
+            Input.AssignedClassId = null;
             Subjects.Clear();
+            Classes.Clear();
         }
     }
 
-    private async Task OnRoleChanged(ChangeEventArgs e)
+    private async void ClassChanged(object? sender, EventArgs e)
     {
-        // await RoleChanged();
+        if (Input.AssignedClassId == null)
+        {
+            Subjects.Clear();
+            Console.WriteLine("Subject list cleared");
+            return;
+        }
+
+        Subjects = await GetSubjectsAsync();
+
+        //Subjects = await ClassManager.GetSubjectsForClassAsync(int.Parse(SelectedClassId));
     }
 
-    private async Task OnClassChanged(ChangeEventArgs e)
+    private async Task<List<Class>> GetClassesAsync()
     {
-        await ClassChanged();
+        return
+        [
+            new Class
+            {
+                Id = 1,
+                Name = "Test"
+            },
+            new Class
+            {
+                Id = 2,
+                Name = "Test"
+            }
+        ];
     }
 
+    private async Task<List<SelectSubjectDto>> GetSubjectsAsync()
+    {
+        if (Input.AssignedClassId != 1) return [];
+
+        return
+        [
+            new SelectSubjectDto
+            {
+                Id = 1,
+                IsSelected = false,
+                Name = "Subject1"
+            },
+            new SelectSubjectDto
+            {
+                Id = 10,
+                IsSelected = false,
+                Name = "Subject10"
+            },
+            new SelectSubjectDto
+            {
+                Id = 30,
+                IsSelected = false,
+                Name = "Subject30"
+            }
+        ];
+    }
+
+    private void AttachEventHandler()
+    {
+        Input.RoleModified += RoleChanged;
+        Input.RoleModified += ClassChanged;
+        Input.ClassModified += ClassChanged;
+    }
 }

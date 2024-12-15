@@ -21,7 +21,8 @@ public partial class Register
     private List<SelectSubjectDto> Subjects { get; set; } = [];
     private string? Message { get; set; }
 
-    private bool ClassesAreLoading { get; set; } = false;
+    private bool ClassesAreLoading { get; set; }
+    private bool SubjectsAreLoading { get; set; }
 
     private List<int> SelectedSubjects => Subjects
         .Where(x => x.IsSelected)
@@ -107,7 +108,6 @@ public partial class Register
             Subjects.Clear();
             ClassesAreLoading = true;
             Classes = await GetClassesAsync();
-            await Task.Delay(2000);
             ClassesAreLoading = false;
             StateHasChanged();
         }
@@ -128,26 +128,16 @@ public partial class Register
             return;
         }
 
+        SubjectsAreLoading = true;
         Subjects = await GetSubjectsAsync();
+        SubjectsAreLoading = false;
+        StateHasChanged();
 
         //Subjects = await ClassManager.GetSubjectsForClassAsync(int.Parse(SelectedClassId));
     }
 
     private async Task<List<Class>> GetClassesAsync()
     {
-        /*return
-        [
-            new Class
-            {
-                Id = 1,
-                Name = "Test"
-            },
-            new Class
-            {
-                Id = 2,
-                Name = "Test"
-            }
-        ];*/
         var response = await HttpClient.GetAsync("api/class");
         //var response = HttpClient.GetFromJsonAsync<List<Class>>("api/class");
 
@@ -164,6 +154,8 @@ public partial class Register
                 Duration = 4000,
                 Style = "word-break:break-word"
             });
+
+            return [];
             //Message = $"Error: {response.StatusCode} - {errorContent}";
         }
 
@@ -173,7 +165,30 @@ public partial class Register
 
     private async Task<List<SelectSubjectDto>> GetSubjectsAsync()
     {
-        if (Input.AssignedClassId != 1) return [];
+        var response = await HttpClient.GetAsync($"api/class/{Input.AssignedClassId}/subjects");
+        //var response = HttpClient.GetFromJsonAsync<List<Class>>("api/class");
+
+        // Check if the response indicates success
+        if (!response.IsSuccessStatusCode)
+        {
+            // Handle non-success responses
+            var errorContent = await response.Content.ReadFromJsonAsync<string>();
+            NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Error,
+                Summary = "Failure",
+                Detail = errorContent,
+                Duration = 4000,
+                Style = "word-break:break-word"
+            });
+            //Message = $"Error: {response.StatusCode} - {errorContent}";
+            return [];
+        }
+
+        var classes = await response.Content.ReadFromJsonAsync<List<GetSubjectDto>>();
+
+        return classes?.Select(x => new SelectSubjectDto(x.Id, x.Name)).ToList() ?? [];
+        /*if (Input.AssignedClassId != 1) return [];
 
         return
         [
@@ -195,7 +210,7 @@ public partial class Register
                 IsSelected = false,
                 Name = "Subject30"
             }
-        ];
+        ];*/
     }
 
     private void AttachEventHandlers()

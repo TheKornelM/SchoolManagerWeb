@@ -7,7 +7,7 @@
 
 <AuthorizeView Roles="Admin" Context="AuthContext">
     <Authorized>
-        <h1>Regisztráció (SSR)</h1>
+        <h1>Registration</h1>
 
         <div class="row">
             <div class="col-md-4">
@@ -76,7 +76,6 @@
                     @if (Input.Role == "Student")
                     {
                         <div class="mb-3">
-                            <label>Class</label>
                             @if (ClassesAreLoading)
                             {
                                 <RadzenProgressBarCircular Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate"/>
@@ -84,10 +83,12 @@
                             }
                             else if (Classes.Count == 0)
                             {
+                                <label>Class</label>
                                 <p>There is no class added in the system.</p>
                             }
                             else
                             {
+                                <label>Class</label>
                                 <InputSelect @bind-value="Input.AssignedClassId">
                                     <option value="">Select Class</option>
                                     @foreach (var cls in Classes)
@@ -103,25 +104,25 @@
                         @if (Input.AssignedClassId != null)
                         {
                             <div class="mb-3">
-                                <label>Subjects</label>
-                                @if (Subjects.Count == 0)
+                                @if (SubjectsAreLoading)
                                 {
+                                    <RadzenProgressBarCircular Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate"/>
+                                    <div>Loading subjects...</div>
+                                }
+                                else if (Subjects.Count == 0)
+                                {
+                                    <label>Subjects</label>
                                     <p>There is no subject added for this class </p>
                                 }
                                 else
                                 {
+                                    <label>Subjects</label>
                                     @foreach (var subject in Subjects)
                                     {
                                         <div>
                                             <input type="checkbox" @bind="subject.IsSelected"/>
                                             <span>@subject.Name</span>
                                         </div>
-                                    }
-
-                                    @if (SelectedSubjects.Count != 0)
-                                    {
-                                        <h2>Selected subjects</h2>
-                                        <p>@string.Join(',', SelectedSubjects)</p>
                                     }
                                 }
                             </div>

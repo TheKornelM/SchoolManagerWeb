@@ -1,7 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.OpenApi;
+using SchoolManagerModel.DTOs;
 using SchoolManagerModel.Entities;
+using SchoolManagerModel.Managers;
 using SchoolManagerModel.Persistence;
 
 namespace SchoolManagerWeb.Endpoints;
@@ -27,6 +30,27 @@ public static class ClassEndpoints
             })
             .WithName("GetClassById")
             .WithOpenApi();
+
+        group.MapGet("/{id}/subjects",
+                async Task<Results<Ok<List<GetSubjectDto>>, NotFound, BadRequest>> (int id,
+                    ClassManager classManager) =>
+                {
+                    var classes = await classManager.GetClassesAsync();
+
+                    var @class = classes.FirstOrDefault(x => x.Id == id);
+
+                    if (@class == null)
+                    {
+                        return TypedResults.NotFound();
+                    }
+
+                    var subjects = await classManager.GetClassSubjectsAsync(@class);
+
+                    return TypedResults.Ok(subjects.Select(x => new GetSubjectDto(x.Id, x.Name)).ToList());
+                })
+            .WithName("GetClassSubjects")
+            .WithOpenApi()
+            .RequireAuthorization("RequireAdminRole");
 
         group.MapPut("/{id}", async Task<Results<Ok, NotFound>> (int id, Class @class, SchoolDbContext db) =>
             {

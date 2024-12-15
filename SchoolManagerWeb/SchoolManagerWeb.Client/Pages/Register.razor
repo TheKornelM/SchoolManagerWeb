@@ -1,4 +1,5 @@
 @page "/Register"
+@using SchoolManagerModel.Entities
 @rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
 
 @inject NavigationManager NavigationManager
@@ -12,7 +13,8 @@
         <div class="row">
             <div class="col-md-4">
                 <StatusMessage Message="@Message"/>
-                <EditForm Model="Input" asp-route-returnUrl="@ReturnUrl" method="post" OnValidSubmit="RegisterUser" FormName="register" Context="EditContext">
+                <EditForm Model="Input" asp-route-returnUrl="@ReturnUrl" method="post" OnValidSubmit="RegisterUser"
+                          FormName="register" Context="EditContext">
                     <DataAnnotationsValidator/>
                     <h2>Create a new account.</h2>
                     <hr/>
@@ -20,113 +22,127 @@
 
                     <!-- Username -->
                     <div class="form-floating mb-3">
-                        <InputText @bind-Value="Input.Username" class="form-control" autocomplete="username" placeholder="Username"/>
+                        <InputText @bind-Value="Input.Username" class="form-control" autocomplete="username"
+                                   placeholder="Username"/>
                         <label>Username</label>
                         <ValidationMessage For="() => Input.Username" class="text-danger"/>
                     </div>
 
                     <!-- Email -->
                     <div class="form-floating mb-3">
-                        <InputText @bind-Value="Input.Email" class="form-control" autocomplete="email" placeholder="Email"/>
+                        <InputText @bind-Value="Input.Email" class="form-control" autocomplete="email"
+                                   placeholder="Email"/>
                         <label>Email</label>
                         <ValidationMessage For="() => Input.Email" class="text-danger"/>
                     </div>
 
                     <!-- First Name -->
                     <div class="form-floating mb-3">
-                        <InputText @bind-Value="Input.FirstName" class="form-control" autocomplete="given-name" placeholder="First Name"/>
+                        <InputText @bind-Value="Input.FirstName" class="form-control" autocomplete="given-name"
+                                   placeholder="First Name"/>
                         <label>First Name</label>
                         <ValidationMessage For="() => Input.FirstName" class="text-danger"/>
                     </div>
 
                     <!-- Last Name -->
                     <div class="form-floating mb-3">
-                        <InputText @bind-Value="Input.LastName" class="form-control" autocomplete="family-name" placeholder="Last Name"/>
+                        <InputText @bind-Value="Input.LastName" class="form-control" autocomplete="family-name"
+                                   placeholder="Last Name"/>
                         <label>Last Name</label>
                         <ValidationMessage For="() => Input.LastName" class="text-danger"/>
                     </div>
 
                     <!-- Password -->
                     <div class="form-floating mb-3">
-                        <InputText @bind-Value="Input.Password" class="form-control" autocomplete="new-password" type="password" placeholder="Password"/>
+                        <InputText @bind-Value="Input.Password" class="form-control" autocomplete="new-password"
+                                   type="password" placeholder="Password"/>
                         <label>Password</label>
                         <ValidationMessage For="() => Input.Password" class="text-danger"/>
                     </div>
 
                     <!-- Confirm Password -->
                     <div class="form-floating mb-3">
-                        <InputText @bind-Value="Input.ConfirmPassword" class="form-control" autocomplete="new-password" type="password" placeholder="Confirm Password"/>
+                        <InputText @bind-Value="Input.ConfirmPassword" class="form-control" autocomplete="new-password"
+                                   type="password" placeholder="Confirm Password"/>
                         <label>Confirm Password</label>
                         <ValidationMessage For="() => Input.ConfirmPassword" class="text-danger"/>
                     </div>
 
                     <!-- Role -->
-                    <div class="mb-3">
-                        <label>Role</label>
-                        <InputSelect @bind-Value="Input.Role">
+                    <div class="mb-3 form-floating">
+                        <InputSelect @bind-Value="Input.Role" class="form-select">
                             <option value="" selected>Select role</option>
                             <option value="Student">Student</option>
                             <option value="Teacher">Teacher</option>
                             <option value="Admin">Administrator</option>
                         </InputSelect>
+                        <label>Role</label>
                         <ValidationMessage For="() => Input.Role" class="text-danger"/>
                     </div>
 
                     <!-- Class Selection (if Student) -->
+
                     @if (Input.Role == "Student")
                     {
-                        <div class="mb-3">
+                        <div class="mb-3 form-floating">
                             @if (ClassesAreLoading)
                             {
-                                <RadzenProgressBarCircular Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate"/>
-                                <div>Loading classes...</div>
+                                <LoadingIndicator Text="Loading classes..."></LoadingIndicator>
                             }
                             else if (Classes.Count == 0)
                             {
+                                <div class="form-control h-auto">
+                                    <p>There is no class added in the system.</p>
+                                </div>
                                 <label>Class</label>
-                                <p>There is no class added in the system.</p>
                             }
                             else
                             {
-                                <label>Class</label>
-                                <InputSelect @bind-value="Input.AssignedClassId">
+                                <InputSelect @bind-value="Input.AssignedClassId" class="form-select">
                                     <option value="">Select Class</option>
                                     @foreach (var cls in Classes)
                                     {
                                         <option value="@cls.Id">@cls.Name</option>
                                     }
                                 </InputSelect>
+                                <label>Class</label>
                                 <ValidationMessage For="() => Input.AssignedClassId" class="text-danger"/>
                             }
                         </div>
 
                         <!-- Subjects Selection -->
-                        @if (Input.AssignedClassId != null)
-                        {
-                            <div class="mb-3">
+                        <div class="mb-3">
+                            @if (Input.AssignedClassId != null)
+                            {
                                 @if (SubjectsAreLoading)
                                 {
-                                    <RadzenProgressBarCircular Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate"/>
-                                    <div>Loading subjects...</div>
-                                }
-                                else if (Subjects.Count == 0)
-                                {
-                                    <label>Subjects</label>
-                                    <p>There is no subject added for this class </p>
+                                    <LoadingIndicator Text="Loading subjects..."></LoadingIndicator>
                                 }
                                 else
                                 {
-                                    <label>Subjects</label>
-                                    @foreach (var subject in Subjects)
-                                    {
-                                        <div>
-                                            <input type="checkbox" @bind="subject.IsSelected"/>
-                                            <span>@subject.Name</span>
-                                        </div>
-                                    }
+                                    <label>Assigned subjects:</label>
+                                    <div class="h-auto">
+                                        @if (Subjects.Count == 0)
+                                        {
+                                            <p>There is no subject added for this class </p>
+                                        }
+                                        else
+                                        {
+                                            <RadzenCheckBoxList @bind-Value=@SelectedSubjectIds TValue="int"
+                                                                Orientation="Orientation.Vertical">
+                                                <Items>
+                                                    @foreach (var subject in Subjects)
+                                                    {
+                                                        <RadzenCheckBoxListItem Text="@subject.Name"
+                                                                                Value="@subject.Id"/>
+                                                    }
+                                                </Items>
+                                            </RadzenCheckBoxList>
+                                        }
+                                    </div>
                                 }
-                            </div>
-                        }
+                            }
+                        </div>
                     }
 
                     <button type="submit" class="btn btn-primary w-100">Register</button>

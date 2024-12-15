@@ -10,23 +10,23 @@ namespace SchoolManagerWeb.Client.Pages;
 
 public partial class Register
 {
-    private IEnumerable<IdentityError>? identityErrors;
     [Inject] public required HttpClient HttpClient { get; set; }
     [Inject] public required NotificationService NotificationService { get; set; }
+
     [SupplyParameterFromForm] private UserRegistrationDto Input { get; set; } = new();
+    [SupplyParameterFromQuery] private string? ReturnUrl { get; set; }
+
+    private const int TimeoutMilliseconds = 15000;
+
     private List<Class> Classes { get; set; } = [];
     private List<SelectSubjectDto> Subjects { get; set; } = [];
+    private IEnumerable<int> SelectedSubjectIds { get; set; } = [];
     private string? Message { get; set; }
     private bool ClassesAreLoading { get; set; }
     private bool SubjectsAreLoading { get; set; }
     private bool RegistrationIsPending { get; set; }
-    [SupplyParameterFromQuery] private string? ReturnUrl { get; set; }
-    const int TimeoutMilliseconds = 15000;
 
-    private List<int> SelectedSubjects => Subjects
-        .Where(x => x.IsSelected)
-        .Select(s => s.Id)
-        .ToList();
+    private List<int> SelectedSubjects => SelectedSubjectIds.ToList();
 
     protected override async Task OnInitializedAsync()
     {
@@ -57,6 +57,7 @@ public partial class Register
                     Style = "word-break:break-word"
                 });
                 Input = new UserRegistrationDto();
+                SelectedSubjectIds = [];
                 AttachEventHandlers();
             }
             else
@@ -82,18 +83,18 @@ public partial class Register
         {
             RegistrationIsPending = false;
         }
-
-        Console.WriteLine(Message); // Log the message for debugging
     }
 
     private async Task RoleChanged()
     {
         if (string.IsNullOrEmpty(Input.Role)) return;
 
+        Input.AssignedClassId = null;
+        Subjects.Clear();
+
         if (Input.Role == "Student")
         {
-            Input.AssignedClassId = null;
-            Subjects.Clear();
+            SelectedSubjectIds = [];
             ClassesAreLoading = true;
             Classes = await GetClassesAsync();
             ClassesAreLoading = false;
@@ -101,8 +102,6 @@ public partial class Register
         }
         else
         {
-            Input.AssignedClassId = null;
-            Subjects.Clear();
             Classes.Clear();
         }
     }
@@ -112,6 +111,7 @@ public partial class Register
         if (Input.AssignedClassId == null)
         {
             Subjects.Clear();
+            SelectedSubjectIds = [];
             return;
         }
 

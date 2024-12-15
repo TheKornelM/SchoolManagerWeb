@@ -1,0 +1,13 @@
+﻿<div class="d-flex align-items-center">
+    <div class="me-3">
+        <RadzenProgressBarCircular Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate"/>
+    </div>
+
+    <div class="flex-grow-1">
+        <span>@Text</span>
+    </div>
+</div>
+
+@code {
+    [Parameter] public string Text { get; set; } = "Loading...";
+}

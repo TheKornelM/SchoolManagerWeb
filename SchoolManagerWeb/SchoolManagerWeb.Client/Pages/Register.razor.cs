@@ -11,43 +11,30 @@ namespace SchoolManagerWeb.Client.Pages;
 public partial class Register
 {
     private IEnumerable<IdentityError>? identityErrors;
-
     [Inject] public required HttpClient HttpClient { get; set; }
     [Inject] public required NotificationService NotificationService { get; set; }
-
     [SupplyParameterFromForm] private UserRegistrationDto Input { get; set; } = new();
-
     private List<Class> Classes { get; set; } = [];
     private List<SelectSubjectDto> Subjects { get; set; } = [];
     private string? Message { get; set; }
-
     private bool ClassesAreLoading { get; set; }
     private bool SubjectsAreLoading { get; set; }
+    private bool RegistrationIsPending { get; set; }
+    [SupplyParameterFromQuery] private string? ReturnUrl { get; set; }
+    const int TimeoutMilliseconds = 15000;
 
     private List<int> SelectedSubjects => Subjects
         .Where(x => x.IsSelected)
         .Select(s => s.Id)
         .ToList();
 
-    [SupplyParameterFromQuery] private string? ReturnUrl { get; set; }
-
     protected override async Task OnInitializedAsync()
     {
-        //Classes = await ClassManager.GetClassesAsync();
         AttachEventHandlers();
     }
 
     private async Task RegisterUser(EditContext editContext)
     {
-        /*if (Input.Role == "Student" && string.IsNullOrEmpty(SelectedClassId))
-        {
-            identityErrors = new[] { new IdentityError { Description = "Students must select a class." } };
-            Message = identityErrors is null ? null : $"Error: {string.Join(", ", identityErrors.Select(error => error.Description))}";
-            return;
-        }*/
-
-        // API call:
-        //var client = HttpClientFactory.CreateClient("ServerAPI");
         try
         {
             if (Input.Role == "Student")
@@ -55,14 +42,12 @@ public partial class Register
                 Input.AssignedSubjects = SelectedSubjects;
             }
 
-            var response = await HttpClient.PostAsJsonAsync("user", Input);
+            var cts = new CancellationTokenSource(TimeoutMilliseconds);
+            RegistrationIsPending = true;
+            var response = await HttpClient.PostAsJsonAsync("user", Input, cts.Token);
 
-            // Check if the response indicates success
             if (response.IsSuccessStatusCode)
             {
-                // Read and display the response content
-                var responseContent = await response.Content.ReadAsStringAsync();
-                //essage = $"Success: {responseContent}";
                 NotificationService.Notify(new NotificationMessage
                 {
                     Severity = NotificationSeverity.Success,
@@ -76,23 +61,26 @@ public partial class Register
             }
             else
             {
-                // Handle non-success responses
-                var errorContent = await response.Content.ReadFromJsonAsync<IdentityError[]>() ?? [];
-                NotificationService.Notify(new NotificationMessage
-                {
-                    Severity = NotificationSeverity.Error,
-                    Summary = "Failure",
-                    Detail = $"Error during user adding!\n{string.Join("\n", errorContent.Select(x => x.Description))}",
-                    Duration = 4000,
-                    Style = "word-break:break-word"
-                });
-                //Message = $"Error: {response.StatusCode} - {errorContent}";
+                var errorContent = await response.Content.ReadFromJsonAsync<IdentityError[]>(cts.Token) ?? [];
+                ShowFailureNotification(
+                    $"Error during user adding!\n{string.Join("\n", errorContent.Select(x => x.Description))}");
             }
+        }
+        catch (OperationCanceledException)
+        {
+            ShowFailureNotification("Network timeout occurred");
+        }
+        catch (HttpRequestException)
+        {
+            ShowFailureNotification($"Network error occurred");
         }
         catch (Exception ex)
         {
-            // Handle any exceptions that occur during the API call
-            Message = $"Exception: {ex.Message}";
+            ShowFailureNotification($"Exception: {ex.Message}");
+        }
+        finally
+        {
+            RegistrationIsPending = false;
         }
 
         Console.WriteLine(Message); // Log the message for debugging
@@ -124,7 +112,6 @@ public partial class Register
         if (Input.AssignedClassId == null)
         {
             Subjects.Clear();
-            Console.WriteLine("Subject list cleared");
             return;
         }
 
@@ -132,85 +119,88 @@ public partial class Register
         Subjects = await GetSubjectsAsync();
         SubjectsAreLoading = false;
         StateHasChanged();
-
-        //Subjects = await ClassManager.GetSubjectsForClassAsync(int.Parse(SelectedClassId));
     }
 
     private async Task<List<Class>> GetClassesAsync()
     {
-        var response = await HttpClient.GetAsync("api/class");
-        //var response = HttpClient.GetFromJsonAsync<List<Class>>("api/class");
+        using var cts = new CancellationTokenSource(TimeoutMilliseconds);
 
-        // Check if the response indicates success
-        if (!response.IsSuccessStatusCode)
+        try
         {
-            // Handle non-success responses
-            var errorContent = await response.Content.ReadFromJsonAsync<string>();
-            NotificationService.Notify(new NotificationMessage
+            var response = await HttpClient.GetAsync("api/class", cts.Token);
+
+            if (!response.IsSuccessStatusCode)
             {
-                Severity = NotificationSeverity.Error,
-                Summary = "Failure",
-                Detail = errorContent,
-                Duration = 4000,
-                Style = "word-break:break-word"
-            });
+                var errorContent = await response.Content.ReadFromJsonAsync<string>(cancellationToken: cts.Token) ??
+                                   "Failed to get classes";
+                ShowFailureNotification(errorContent);
+                return [];
+            }
 
-            return [];
-            //Message = $"Error: {response.StatusCode} - {errorContent}";
+            var classes = await response.Content.ReadFromJsonAsync<List<Class>>(cancellationToken: cts.Token);
+            return classes ?? [];
         }
-
-        var classes = await response.Content.ReadFromJsonAsync<List<Class>>();
-        return classes ?? [];
+        catch (OperationCanceledException)
+        {
+            ShowFailureNotification("Network timeout occurred");
+            return [];
+        }
+        catch (HttpRequestException)
+        {
+            ShowFailureNotification($"Network error occurred");
+            return [];
+        }
+        catch (Exception)
+        {
+            ShowFailureNotification($"Unexpected error occurred");
+            return [];
+        }
+        finally
+        {
+            ClassesAreLoading = false;
+            StateHasChanged();
+        }
     }
 
     private async Task<List<SelectSubjectDto>> GetSubjectsAsync()
     {
-        var response = await HttpClient.GetAsync($"api/class/{Input.AssignedClassId}/subjects");
-        //var response = HttpClient.GetFromJsonAsync<List<Class>>("api/class");
+        using var cts = new CancellationTokenSource(TimeoutMilliseconds);
 
-        // Check if the response indicates success
-        if (!response.IsSuccessStatusCode)
+        try
         {
-            // Handle non-success responses
-            var errorContent = await response.Content.ReadFromJsonAsync<string>();
-            NotificationService.Notify(new NotificationMessage
+            var response = await HttpClient.GetAsync($"api/class/{Input.AssignedClassId}/subjects", cts.Token);
+
+            if (response.IsSuccessStatusCode)
             {
-                Severity = NotificationSeverity.Error,
-                Summary = "Failure",
-                Detail = errorContent,
-                Duration = 4000,
-                Style = "word-break:break-word"
-            });
-            //Message = $"Error: {response.StatusCode} - {errorContent}";
-            return [];
+                var subjects =
+                    await response.Content.ReadFromJsonAsync<List<GetSubjectDto>>(cancellationToken: cts.Token) ?? [];
+                return subjects.Select(x => new SelectSubjectDto(x.Id, x.Name)).ToList();
+            }
+
+            // Handle non-success responses
+            var errorContent = await response.Content.ReadFromJsonAsync<string>(cancellationToken: cts.Token)
+                               ?? "Failed to get subjects";
+            ShowFailureNotification(errorContent);
+        }
+        catch (OperationCanceledException)
+        {
+            ShowFailureNotification("Network timeout occurred");
+        }
+        catch (HttpRequestException)
+        {
+            ShowFailureNotification("Network error occurred");
+        }
+        catch (Exception)
+        {
+            ShowFailureNotification("Unexpected error occurred");
+        }
+        finally
+        {
+            ClassesAreLoading = false;
+            StateHasChanged();
         }
 
-        var classes = await response.Content.ReadFromJsonAsync<List<GetSubjectDto>>();
-
-        return classes?.Select(x => new SelectSubjectDto(x.Id, x.Name)).ToList() ?? [];
-        /*if (Input.AssignedClassId != 1) return [];
-
-        return
-        [
-            new SelectSubjectDto
-            {
-                Id = 1,
-                IsSelected = false,
-                Name = "Subject1"
-            },
-            new SelectSubjectDto
-            {
-                Id = 10,
-                IsSelected = false,
-                Name = "Subject10"
-            },
-            new SelectSubjectDto
-            {
-                Id = 30,
-                IsSelected = false,
-                Name = "Subject30"
-            }
-        ];*/
+        return [];
     }
 
     private void AttachEventHandlers()
@@ -221,5 +211,17 @@ public partial class Register
             await ClassChanged();
         };
         Input.ClassModified = async () => await ClassChanged();
+    }
+
+    private void ShowFailureNotification(string message)
+    {
+        NotificationService.Notify(new NotificationMessage
+        {
+            Severity = NotificationSeverity.Error,
+            Summary = "Error",
+            Detail = message,
+            Duration = 4000,
+            Style = "word-break:break-word"
+        });
     }
 }

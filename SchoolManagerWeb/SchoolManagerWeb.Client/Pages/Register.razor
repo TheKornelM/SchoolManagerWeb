@@ -130,6 +130,11 @@
                     }
 
                     <button type="submit" class="btn btn-primary w-100">Register</button>
+                    @if (RegistrationIsPending)
+                    {
+                        <RadzenProgressBarCircular Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate"/>
+                        <div>Registering user...</div>
+                    }
                 </EditForm>
             </div>
         </div>

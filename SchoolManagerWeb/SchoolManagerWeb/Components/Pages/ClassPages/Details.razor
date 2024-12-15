@@ -6,32 +6,39 @@
 
 <PageTitle>Details</PageTitle>
 
-<h1>Details</h1>
+<AuthorizeView Roles="Admin" Context="AuthContext">
+    <Authorized>
+        <h1>Details</h1>
 
-<div>
-    <h2>Class</h2>
-    <hr />
-    @if (currentClass is null)
-    {
-        <p><em>Loading...</em></p>
-    }
-    else {
-        <dl class="row">
-            <dt class="col-sm-2">Name</dt>
-            <dd class="col-sm-10">@currentClass.Name</dd>
-        </dl>
         <div>
-            <a href="@($"/classes/edit?id={currentClass.Id}")">Edit</a> |
-            <a href="@($"/classes")">Back to List</a>
+            <h2>Class</h2>
+            <hr/>
+            @if (currentClass is null)
+            {
+                <p><em>Loading...</em></p>
+            }
+            else
+            {
+                <dl class="row">
+                    <dt class="col-sm-2">Name</dt>
+                    <dd class="col-sm-10">@currentClass.Name</dd>
+                </dl>
+                <div>
+                    <a href="@($"/classes/edit?id={currentClass.Id}")">Edit</a> |
+                    <a href="@($"/classes")">Back to List</a>
+                </div>
+            }
         </div>
-    }
-</div>
+    </Authorized>
+    <NotAuthorized>
+        <RedirectNotFound/>
+    </NotAuthorized>
+</AuthorizeView>
 
 @code {
     private Class? currentClass;
 
-    [SupplyParameterFromQuery]
-    private int Id { get; set; }
+    [SupplyParameterFromQuery] private int Id { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -43,4 +50,5 @@
             NavigationManager.NavigateTo("notfound");
         }
     }
+
 }

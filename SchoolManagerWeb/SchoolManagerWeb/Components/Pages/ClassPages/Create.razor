@@ -5,33 +5,38 @@
 @inject NavigationManager NavigationManager
 
 <PageTitle>Create</PageTitle>
+<AuthorizeView Roles="Admin" Context="AuthContext">
+    <Authorized>
+        <h1>Create</h1>
 
-<h1>Create</h1>
+        <h2>Class</h2>
+        <hr/>
+        <div class="row">
+            <div class="col-md-4">
+                <EditForm method="post" Model="Class" OnValidSubmit="AddClass" FormName="create" Enhance>
+                    <DataAnnotationsValidator/>
+                    <ValidationSummary class="text-danger" role="alert"/>
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Name:</label>
+                        <InputText id="name" @bind-Value="Class.Name" class="form-control"/>
+                        <ValidationMessage For="() => Class.Name" class="text-danger"/>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Create</button>
+                </EditForm>
+            </div>
+        </div>
 
-<h2>Class</h2>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <EditForm method="post" Model="Class" OnValidSubmit="AddClass" FormName="create" Enhance>
-            <DataAnnotationsValidator />
-            <ValidationSummary class="text-danger" role="alert"/>
-            <div class="mb-3">
-                <label for="name" class="form-label">Name:</label> 
-                <InputText id="name" @bind-Value="Class.Name" class="form-control" /> 
-                <ValidationMessage For="() => Class.Name" class="text-danger" /> 
-            </div>        
-            <button type="submit" class="btn btn-primary">Create</button>
-        </EditForm>
-    </div>
-</div>
-
-<div>
-    <a href="/classes">Back to List</a>
-</div>
+        <div>
+            <a href="/classes">Back to List</a>
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <RedirectNotFound/>
+    </NotAuthorized>
+</AuthorizeView>
 
 @code {
-    [SupplyParameterFromForm]
-    private Class Class { get; set; } = new();
+    [SupplyParameterFromForm] private Class Class { get; set; } = new();
 
     // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
     private async Task AddClass()
@@ -41,4 +46,5 @@
         await context.SaveChangesAsync();
         NavigationManager.NavigateTo("/classes");
     }
+
 }

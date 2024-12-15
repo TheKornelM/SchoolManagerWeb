@@ -1,4 +1,5 @@
 ﻿@page "/classes"
+@rendermode InteractiveServer
 @using Microsoft.EntityFrameworkCore
 @using Microsoft.AspNetCore.Components.QuickGrid
 @using SchoolManagerModel.Entities
@@ -9,27 +10,34 @@
 
 <PageTitle>Index</PageTitle>
 
-<h1>Classes</h1>
+<AuthorizeView Roles="Admin" Context="AuthContext">
+    <Authorized>
+        <h1>Classes</h1>
 
-<p>
-    <a href="classes/create">Create New</a>
-</p>
+        <p>
+            <a href="classes/create">Create New</a>
+        </p>
 
-@if (Classes != null)
-{
-    <QuickGrid Class="table" Items="Classes.AsQueryable()" TItem="Class">
-        <PropertyColumn Property="@(x => x.Name)" Title="Class Name"/>
-        <TemplateColumn Context="currentClass">
-            <a href="@($"classes/edit?id={currentClass.Id}")">Edit</a> |
-            <a href="@($"classes/details?id={currentClass.Id}")">Details</a> |
-            <a href="@($"classes/delete?id={currentClass.Id}")">Delete</a>
-        </TemplateColumn>
-    </QuickGrid>
-}
-else
-{
-    <p>Loading...</p>
-}
+        @if (Classes != null)
+        {
+            <QuickGrid Class="table" Items="Classes.AsQueryable()" TItem="Class">
+                <PropertyColumn Property="@(x => x.Name)" Title="Class Name"/>
+                <TemplateColumn Context="currentClass">
+                    <a href="@($"classes/edit?id={currentClass.Id}")">Edit</a> |
+                    <a href="@($"classes/details?id={currentClass.Id}")">Details</a> |
+                    <a href="@($"classes/delete?id={currentClass.Id}")">Delete</a>
+                </TemplateColumn>
+            </QuickGrid>
+        }
+        else
+        {
+            <p>Loading...</p>
+        }
+    </Authorized>
+    <NotAuthorized>
+        <RedirectNotFound/>
+    </NotAuthorized>
+</AuthorizeView>
 
 @code {
     private SchoolDbContext context = default!;

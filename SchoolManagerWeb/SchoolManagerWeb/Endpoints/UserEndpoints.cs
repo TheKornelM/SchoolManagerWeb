@@ -7,6 +7,8 @@ using SchoolManagerWeb.Components.Account.Pages;
 using System.Net;
 using Microsoft.AspNetCore.Http.HttpResults;
 using SchoolManagerModel.Entities;
+using SchoolManagerModel.Extensions;
+using SchoolManagerModel.Validators;
 
 namespace SchoolManagerWeb.Endpoints;
 
@@ -25,11 +27,26 @@ public static class UserEndpoints
                     List<IdentityError> identityErrors = [];
 
                     // User validator
+                    var user = userDto.ToUser();
+
+                    var userValidator =
+                        new ValidNotExistsUserValidator(userManager, UIResourceFactory.GetNewResource());
+                    var validationResult = await userValidator.ValidateAsync(user);
+
+                    if (!validationResult.IsValid)
+                    {
+                        identityErrors = validationResult.Errors.Select(error => new IdentityError
+                        {
+                            Description = $"{error.PropertyName}: {error.ErrorMessage}"
+                        }).ToList();
+
+                        return TypedResults.BadRequest(identityErrors);
+                    }
 
                     // Role validator
                     if (StringRoleConverter.GetRole(userDto.Role) == null)
                     {
-                        identityErrors.Add(new IdentityError()
+                        identityErrors.Add(new IdentityError
                         {
                             Description = $"Given role ({userDto.Role}) is not valid role."
                         });
@@ -37,13 +54,6 @@ public static class UserEndpoints
                         return TypedResults.BadRequest(identityErrors);
                     }
 
-                    var user = new User()
-                    {
-                        UserName = userDto.Username,
-                        Email = userDto.Email,
-                        FirstName = userDto.FirstName,
-                        LastName = userDto.LastName
-                    };
                     Class? @class = null;
 
                     // Student validator
@@ -75,7 +85,7 @@ public static class UserEndpoints
                         if (userDto.AssignedSubjects.Distinct().Count() != userDto.AssignedSubjects.Count)
                         {
                             identityErrors.Add(new IdentityError
-                                { Description = "Given subject IDs must be uniquq." });
+                                { Description = "Given subject IDs must be unique." });
                         }
 
                         var classSubjects = await classManager.GetClassSubjectsAsync(@class);
@@ -152,17 +162,9 @@ public static class UserEndpoints
 
                     await emailSender.SendConfirmationLinkAsync(user, user.Email, HtmlEncoder.Default.Encode(callbackUrl));*/
 
-
-                    if (userManager.Options.SignIn.RequireConfirmedAccount)
-                    {
-                        /*RedirectManager.RedirectTo(
-                            "Account/RegisterConfirmation",
-                            new() { ["email"] = user.Email, ["returnUrl"] = ReturnUrl });*/
-                        return TypedResults.Ok("User created successfully. You need to confirm your email address.");
-                    }
-
-                    //RedirectManager.RedirectTo(ReturnUrl); */
-                    return TypedResults.Ok("User created successfully");
+                    return TypedResults.Ok(userManager.Options.SignIn.RequireConfirmedAccount
+                        ? "User created successfully. User needs to confirm the email address."
+                        : "User created successfully");
                 })
             .RequireAuthorization("RequireAdminRole");
         return app;

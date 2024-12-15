@@ -19,7 +19,7 @@ public partial class Register
     private const int TimeoutMilliseconds = 15000;
 
     private List<Class> Classes { get; set; } = [];
-    private List<SelectSubjectDto> Subjects { get; set; } = [];
+    private List<GetSubjectDto> Subjects { get; set; } = [];
     private IEnumerable<int> SelectedSubjectIds { get; set; } = [];
     private string? Message { get; set; }
     private bool ClassesAreLoading { get; set; }
@@ -162,7 +162,7 @@ public partial class Register
         }
     }
 
-    private async Task<List<SelectSubjectDto>> GetSubjectsAsync()
+    private async Task<List<GetSubjectDto>> GetSubjectsAsync()
     {
         using var cts = new CancellationTokenSource(TimeoutMilliseconds);
 
@@ -174,7 +174,7 @@ public partial class Register
             {
                 var subjects =
                     await response.Content.ReadFromJsonAsync<List<GetSubjectDto>>(cancellationToken: cts.Token) ?? [];
-                return subjects.Select(x => new SelectSubjectDto(x.Id, x.Name)).ToList();
+                return subjects;
             }
 
             // Handle non-success responses

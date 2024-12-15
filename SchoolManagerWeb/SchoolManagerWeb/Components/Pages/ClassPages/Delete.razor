@@ -1,8 +1,4 @@
 ﻿@page "/classes/delete"
-@using Microsoft.EntityFrameworkCore
-@using SchoolManagerModel.Entities
-@inject IDbContextFactory<SchoolManagerModel.Persistence.SchoolDbContext> DbFactory
-@inject NavigationManager NavigationManager
 
 <PageTitle>Delete</PageTitle>
 <AuthorizeView Roles="Admin" Context="AuthorizeContext">
@@ -37,28 +33,4 @@
     </NotAuthorized>
 </AuthorizeView>
 
-@code {
-    private Class? currentClass;
 
-    [SupplyParameterFromQuery] private int Id { get; set; }
-
-    protected override async Task OnInitializedAsync()
-    {
-        using var context = DbFactory.CreateDbContext();
-        currentClass = await context.Classes.FirstOrDefaultAsync(m => m.Id == Id);
-
-        if (currentClass is null)
-        {
-            NavigationManager.NavigateTo("notfound");
-        }
-    }
-
-    private async Task DeleteClass()
-    {
-        using var context = DbFactory.CreateDbContext();
-        context.Classes.Remove(currentClass!);
-        await context.SaveChangesAsync();
-        NavigationManager.NavigateTo("/classes");
-    }
-
-}

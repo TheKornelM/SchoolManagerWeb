@@ -8,6 +8,7 @@ using SchoolManagerModel.Managers;
 using SchoolManagerModel.Persistence;
 using SchoolManagerWeb.Components;
 using SchoolManagerWeb.Components.Account;
+using SchoolManagerWeb.Endpoints;
 
 
 namespace SchoolManagerWeb
@@ -107,10 +108,8 @@ namespace SchoolManagerWeb
             builder.Services.AddScoped<ClassManager>();
             builder.Services.AddScoped<SubjectManager>();
             builder.Services.AddScoped<TeacherManager>();
-            builder.Services.AddDbContextFactory<SchoolDbContext>(options =>
-            {
-                options.UseNpgsql(connectionString);
-            }, ServiceLifetime.Scoped);
+            builder.Services.AddDbContextFactory<SchoolDbContext>(options => { options.UseNpgsql(connectionString); },
+                ServiceLifetime.Scoped);
             /*builder.Services.AddSwaggerGen(options =>
             {
                 options.SwaggerDoc("v1", new OpenApiInfo
@@ -180,8 +179,8 @@ namespace SchoolManagerWeb
 
             // Add additional endpoints required by the Identity /Account Razor components.
             app.MapAdditionalIdentityEndpoints();
-            //app.AddUserEndpoints();
-            //app.MapClassEndpoints();
+            app.AddUserEndpoints();
+            app.MapClassEndpoints();
 
             app.UseAntiforgery();
 

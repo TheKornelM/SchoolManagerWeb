@@ -41,7 +41,9 @@
     // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
     private async Task AddClass()
     {
-        using var context = DbFactory.CreateDbContext();
+        Class.Name = Class.Name.Trim();
+
+        await using var context = DbFactory.CreateDbContext();
         context.Classes.Add(Class);
         await context.SaveChangesAsync();
         NavigationManager.NavigateTo("/classes");

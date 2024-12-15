@@ -1,6 +1,8 @@
 ﻿@page "/classes/create"
 @using Microsoft.EntityFrameworkCore
 @using SchoolManagerModel.Entities
+@using SchoolManagerModel.Utils
+@using SchoolManagerModel.Validators
 @inject IDbContextFactory<SchoolManagerModel.Persistence.SchoolDbContext> DbFactory
 @inject NavigationManager NavigationManager
 
@@ -14,12 +16,17 @@
         <div class="row">
             <div class="col-md-4">
                 <EditForm method="post" Model="Class" OnValidSubmit="AddClass" FormName="create" Enhance>
-                    <DataAnnotationsValidator/>
+                    <FluentValidationValidator Validator="ClassValidator"/>
                     <ValidationSummary class="text-danger" role="alert"/>
                     <div class="mb-3">
-                        <label for="name" class="form-label">Name:</label>
-                        <InputText id="name" @bind-Value="Class.Name" class="form-control"/>
-                        <ValidationMessage For="() => Class.Name" class="text-danger"/>
+                        <label for="year" class="form-label">Year:</label>
+                        <InputNumber id="year" @bind-Value="Class.Year" class="form-control"/>
+                        <ValidationMessage For="() => Class.Year" class="text-danger"/>
+                    </div>
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Class:</label>
+                        <InputText id="name" @bind-Value="Class.SchoolClass" class="form-control"/>
+                        <ValidationMessage For="() => Class.SchoolClass" class="text-danger"/>
                     </div>
                     <button type="submit" class="btn btn-primary">Create</button>
                 </EditForm>
@@ -36,12 +43,18 @@
 </AuthorizeView>
 
 @code {
-    [SupplyParameterFromForm] private Class Class { get; set; } = new();
+    [SupplyParameterFromForm] private Class? Class { get; set; }
+
+    ClassValidator ClassValidator { get; set; } = new(UIResourceFactory.GetNewResource());
 
     // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
     private async Task AddClass()
     {
-        Class.Name = Class.Name.Trim();
+        if (Class == null)
+        {
+            NavigationManager.NavigateTo("/notfound");
+            return;
+        }
 
         await using var context = DbFactory.CreateDbContext();
         context.Classes.Add(Class);

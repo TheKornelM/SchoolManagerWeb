@@ -1,6 +1,8 @@
 ﻿@page "/classes/edit"
 @using Microsoft.EntityFrameworkCore
 @using SchoolManagerModel.Entities
+@using SchoolManagerModel.Utils
+@using SchoolManagerModel.Validators
 @inject IDbContextFactory<SchoolManagerModel.Persistence.SchoolDbContext> DbFactory
 @inject NavigationManager NavigationManager
 
@@ -21,13 +23,16 @@
             <div class="row">
                 <div class="col-md-4">
                     <EditForm method="post" Model="Class" OnValidSubmit="UpdateClass" FormName="edit" Enhance>
-                        <DataAnnotationsValidator/>
-                        <ValidationSummary role="alert"/>
-                        <input type="hidden" name="Class.Id" value="@Class.Id"/>
+                        <FluentValidationValidator Validator="ClassValidator"/>
                         <div class="mb-3">
-                            <label for="name" class="form-label">Name:</label>
-                            <InputText id="name" @bind-Value="Class.Name" class="form-control"/>
-                            <ValidationMessage For="() => Class.Name" class="text-danger"/>
+                            <label for="year" class="form-label">Year:</label>
+                            <RadzenNumeric id="year" @bind-Value="Class.Year" class="form-control" Min="1"/>
+                            <ValidationMessage For="() => Class.Year" class="text-danger"/>
+                        </div>
+                        <div class="mb-3">
+                            <label for="class" class="form-label">Class:</label>
+                            <InputText id="class" @bind-Value="Class.SchoolClass" class="form-control"/>
+                            <ValidationMessage For="() => Class.SchoolClass" class="text-danger"/>
                         </div>
                         <button type="submit" class="btn btn-primary">Save</button>
                     </EditForm>
@@ -49,6 +54,8 @@
 
     [SupplyParameterFromForm] private Class? Class { get; set; }
 
+    ClassValidator ClassValidator = new(UIResourceFactory.GetNewResource());
+
     protected override async Task OnInitializedAsync()
     {
         using var context = DbFactory.CreateDbContext();
@@ -64,7 +71,7 @@
     // For more information, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
     private async Task UpdateClass()
     {
-        Class!.Name = Class.Name.Trim();
+        //Class!.Name = Class.Name.Trim();
         using var context = DbFactory.CreateDbContext();
         context.Attach(Class!).State = EntityState.Modified;
 

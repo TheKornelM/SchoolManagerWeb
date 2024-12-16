@@ -45,7 +45,11 @@
     protected override async Task OnInitializedAsync()
     {
         context = DbFactory.CreateDbContext();
-        Classes = await context.Classes.ToListAsync();
+        Classes = await context.Classes
+            .OrderBy(x => x.Year)
+            .ThenBy(x => x.SchoolClass)
+            .ThenBy(x => x.Id)
+            .ToListAsync();
     }
 
     public async ValueTask DisposeAsync() => await context.DisposeAsync();

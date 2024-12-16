@@ -17,15 +17,14 @@
             <div class="col-md-4">
                 <EditForm method="post" Model="Class" OnValidSubmit="AddClass" FormName="create" Enhance>
                     <FluentValidationValidator Validator="ClassValidator"/>
-                    <ValidationSummary class="text-danger" role="alert"/>
                     <div class="mb-3">
                         <label for="year" class="form-label">Year:</label>
-                        <InputNumber id="year" @bind-Value="Class.Year" class="form-control"/>
+                        <RadzenNumeric id="year" @bind-Value="Class.Year" class="form-control" Min="1"/>
                         <ValidationMessage For="() => Class.Year" class="text-danger"/>
                     </div>
                     <div class="mb-3">
-                        <label for="name" class="form-label">Class:</label>
-                        <InputText id="name" @bind-Value="Class.SchoolClass" class="form-control"/>
+                        <label for="class" class="form-label">Class:</label>
+                        <InputText id="class" @bind-Value="Class.SchoolClass" class="form-control"/>
                         <ValidationMessage For="() => Class.SchoolClass" class="text-danger"/>
                     </div>
                     <button type="submit" class="btn btn-primary">Create</button>
@@ -43,7 +42,13 @@
 </AuthorizeView>
 
 @code {
-    [SupplyParameterFromForm] private Class? Class { get; set; }
+
+    [SupplyParameterFromForm]
+    private Class? Class { get; set; } = new()
+    {
+        Year = 1,
+        SchoolClass = "A"
+    };
 
     ClassValidator ClassValidator { get; set; } = new(UIResourceFactory.GetNewResource());
 
@@ -56,6 +61,7 @@
             return;
         }
 
+        Class.SchoolClass = Class.SchoolClass.ToUpper();
         await using var context = DbFactory.CreateDbContext();
         context.Classes.Add(Class);
         await context.SaveChangesAsync();

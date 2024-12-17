@@ -12,7 +12,6 @@ public partial class Details
     private Class? currentClass;
     private List<User> Students;
     private List<Subject> Subjects = [];
-    private int _selectedTabIndex = 0;
     [SupplyParameterFromQuery] private int Id { get; set; }
 
     private EventCallback<int> OnSelectedTabChanged { get; set; }
@@ -47,7 +46,7 @@ public partial class Details
                 break;
         }
 
-        _selectedTabIndex = tabIndex;
+        //_selectedTabIndex = tabIndex;
     }
 
     private async Task FetchStudentsAsync()

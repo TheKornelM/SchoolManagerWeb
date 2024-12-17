@@ -35,7 +35,7 @@ public partial class Delete
             return;
         }
 
-        if (await ClassManager.ClassExistsAsync(currentClass))
+        if (!await ClassManager.ClassExistsAsync(currentClass))
         {
             Notifier.ShowError("Class not found. It was probably already deleted from the database");
             return;

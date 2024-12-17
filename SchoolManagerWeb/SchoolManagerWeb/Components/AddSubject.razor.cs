@@ -9,12 +9,22 @@ namespace SchoolManagerWeb.Components;
 public partial class AddSubject
 {
     [Inject] public required Notifier Notifier { get; set; }
+    [Inject] public NavigationManager NavigationManager { get; set; }
     [Parameter] public required Class SelectedClass { get; set; } // Class passed as parameter
 
-    private List<Teacher> teachers = new();
-    private Teacher selectedTeacher;
-    private string subjectName = string.Empty;
-    private Subject newSubject;
+    private List<Teacher> teachers = [];
+
+    // private string subjectName = string.Empty;
+    private Subject newSubject = new Subject
+    {
+        Name = string.Empty,
+        Teacher = null!,
+        Class = new Class()
+        {
+            Year = 1,
+            SchoolClass = string.Empty
+        },
+    };
 
     protected override async Task OnInitializedAsync()
     {
@@ -33,15 +43,9 @@ public partial class AddSubject
     private async Task OnSubmit()
     {
         // Validation: Check for null or empty inputs
-        if (string.IsNullOrWhiteSpace(subjectName))
+        if (string.IsNullOrWhiteSpace(newSubject.Name))
         {
             Notifier.ShowError("Subject name is required.");
-            return;
-        }
-
-        if (selectedTeacher == null)
-        {
-            Notifier.ShowError("Please select a teacher.");
             return;
         }
 
@@ -50,12 +54,9 @@ public partial class AddSubject
         if (!classExists)
         {
             Notifier.ShowError("The selected class does not exist.");
+            NavigationManager.NavigateTo("/classes");
             return;
         }
-
-        // Save the subject
-        newSubject.Name = subjectName;
-        newSubject.Teacher = selectedTeacher;
 
         try
         {
@@ -67,11 +68,6 @@ public partial class AddSubject
         {
             Notifier.ShowError($"Error saving subject: {ex.Message}");
         }
-    }
-
-    private void OnCancel()
-    {
-        CloseDialog();
     }
 
     private void CloseDialog()

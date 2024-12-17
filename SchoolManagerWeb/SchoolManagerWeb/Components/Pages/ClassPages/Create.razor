@@ -43,29 +43,6 @@
 
 @code {
 
-    [SupplyParameterFromForm]
-    private Class? Class { get; set; } = new()
-    {
-        Year = 1,
-        SchoolClass = "A"
-    };
-
-    ClassValidator ClassValidator { get; set; } = new(UIResourceFactory.GetNewResource());
-
     // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
-    private async Task AddClass()
-    {
-        if (Class == null)
-        {
-            NavigationManager.NavigateTo("/notfound");
-            return;
-        }
-
-        Class.SchoolClass = Class.SchoolClass.ToUpper();
-        await using var context = DbFactory.CreateDbContext();
-        context.Classes.Add(Class);
-        await context.SaveChangesAsync();
-        NavigationManager.NavigateTo("/classes");
-    }
 
 }

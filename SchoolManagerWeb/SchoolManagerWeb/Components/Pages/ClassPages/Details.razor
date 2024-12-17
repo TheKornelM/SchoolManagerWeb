@@ -48,29 +48,3 @@
         <RedirectNotFound/>
     </NotAuthorized>
 </AuthorizeView>
-
-@code {
-    private Class? currentClass;
-
-    private List<User> Students;
-
-    [SupplyParameterFromQuery] private int Id { get; set; }
-
-    protected override async Task OnInitializedAsync()
-    {
-        using var context = DbFactory.CreateDbContext();
-        currentClass = await context.Classes.FirstOrDefaultAsync(m => m.Id == Id);
-
-        if (currentClass is null)
-        {
-            NavigationManager.NavigateTo("notfound");
-            return;
-        }
-
-
-        var result = await ClassManager.GetClassStudentsAsync(currentClass);
-
-        Students = result;
-    }
-
-}

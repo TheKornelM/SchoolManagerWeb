@@ -35,15 +35,21 @@ public partial class Delete
             return;
         }
 
-        var subjects = await ClassManager.GetClassSubjectsAsync(currentClass);
-        var students = await ClassManager.GetClassStudentsAsync(currentClass);
-        var classes = await ClassManager.GetClassesAsync();
-
-        if (classes.All(x => x.Id != currentClass.Id))
+        if (await ClassManager.ClassExistsAsync(currentClass))
         {
             Notifier.ShowError("Class not found. It was probably already deleted from the database");
             return;
         }
+
+        var subjectsTask = ClassManager.GetClassSubjectsAsync(currentClass);
+        var studentsTask = ClassManager.GetClassStudentsAsync(currentClass);
+        var classesTask = ClassManager.GetClassesAsync();
+
+        await Task.WhenAll(subjectsTask, studentsTask, classesTask);
+
+        var subjects = subjectsTask.Result;
+        var classes = classesTask.Result;
+        var students = studentsTask.Result;
 
         if (subjects.Count != 0 || students.Count != 0)
         {

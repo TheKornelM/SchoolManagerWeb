@@ -19,24 +19,45 @@
             else
             {
                 <h2>Class: @currentClass.Name</h2>
-                <hr/>
-                <h3>Roster</h3>
-                if (Students.Count == 0)
-                {
-                    <p>There are no students in this class.</p>
-                }
-                else
-                {
-                    @foreach (var student in Students)
-                    {
-                        <p>@student.Name</p>
-                    }
+                <RadzenTabs TabPosition="TabPosition.Top" SelectedIndexChanged="OnSelectedTabChanged"
+                            RenderMode="TabRenderMode.Server">
+                    <Tabs>
+                        <RadzenTabsItem Text="Roster">
+                            <h3>Roster</h3>
+                            @if (Students.Count == 0)
+                            {
+                                <p>There are no students in this class.</p>
+                            }
+                            else
+                            {
+                                <ul>
+                                    @foreach (var student in Students)
+                                    {
+                                        <li>@student.Name</li>
+                                    }
+                                </ul>
 
-                    <hr/>
-                    <label>Number of students: @Students.Count</label>
-                }
-
-                <hr/>
+                                <b>Number of students: @Students.Count</b>
+                            }
+                        </RadzenTabsItem>
+                        <RadzenTabsItem Text="Subjects">
+                            <h3>Subjects</h3>
+                            @if (Subjects.Count == 0)
+                            {
+                                <p>There is no subject assigned to this class.</p>
+                            }
+                            else
+                            {
+                                <ul>
+                                    @foreach (var subject in Subjects)
+                                    {
+                                        <li>@subject.Name</li>
+                                    }
+                                </ul>
+                            }
+                        </RadzenTabsItem>
+                    </Tabs>
+                </RadzenTabs>
                 <div>
                     <a href="@($"/classes/edit?id={currentClass.Id}")">Edit</a> |
                     <a href="@($"/classes")">Back to List</a>

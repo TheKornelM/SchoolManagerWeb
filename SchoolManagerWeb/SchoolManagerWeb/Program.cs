@@ -9,7 +9,7 @@ using SchoolManagerModel.Persistence;
 using SchoolManagerWeb.Components;
 using SchoolManagerWeb.Components.Account;
 using SchoolManagerWeb.Endpoints;
-using SchoolManagerWeb;
+using SchoolManagerWeb.Utils;
 
 
 namespace SchoolManagerWeb
@@ -97,6 +97,8 @@ namespace SchoolManagerWeb
                 });
             });
 
+            builder.Services.AddQuickGridEntityFrameworkAdapter();
+
             // Add SchoolManager service and repository classes
             builder.Services.AddTransient<SchoolDbContextBase, SchoolDbContext>();
             builder.Services.AddScoped<IAsyncClassDataHandler, ClassDatabase>();
@@ -107,6 +109,8 @@ namespace SchoolManagerWeb
             builder.Services.AddScoped<ClassManager>();
             builder.Services.AddScoped<SubjectManager>();
             builder.Services.AddScoped<TeacherManager>();
+            builder.Services.AddDbContextFactory<SchoolDbContext>(options => { options.UseNpgsql(connectionString); },
+                ServiceLifetime.Scoped);
             /*builder.Services.AddSwaggerGen(options =>
             {
                 options.SwaggerDoc("v1", new OpenApiInfo
@@ -135,6 +139,7 @@ namespace SchoolManagerWeb
             builder.Services.AddSingleton<IEmailSender<User>, IdentityNoOpEmailSender>();
             builder.Services.AddRadzenComponents();
             builder.Services.AddScoped<NotificationService>();
+            builder.Services.AddScoped<Notifier>();
 
             builder.Services.AddEndpointsApiExplorer();
 
@@ -158,6 +163,7 @@ namespace SchoolManagerWeb
                 app.UseExceptionHandler("/Error");
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
+                app.UseMigrationsEndPoint();
             }
 
             if (app.Environment.IsDevelopment())

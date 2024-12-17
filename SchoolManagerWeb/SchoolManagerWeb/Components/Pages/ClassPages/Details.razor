@@ -1,0 +1,72 @@
+﻿@page "/classes/details"
+@using Microsoft.EntityFrameworkCore
+@using SchoolManagerModel.Entities
+@using SchoolManagerModel.Entities.UserModel
+@inject IDbContextFactory<SchoolManagerModel.Persistence.SchoolDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Details</PageTitle>
+
+<AuthorizeView Roles="Admin" Context="AuthContext">
+    <Authorized>
+        <h1>Details</h1>
+
+        <div>
+            @if (currentClass is null)
+            {
+                <p><em>Loading...</em></p>
+            }
+            else
+            {
+                <h2>Class: @currentClass.Name</h2>
+                <RadzenTabs TabPosition="TabPosition.Top" SelectedIndexChanged="OnSelectedTabChanged"
+                            RenderMode="TabRenderMode.Server">
+                    <Tabs>
+                        <RadzenTabsItem Text="Roster">
+                            <h3>Roster</h3>
+                            @if (Students.Count == 0)
+                            {
+                                <p>There are no students in this class.</p>
+                            }
+                            else
+                            {
+                                <ul>
+                                    @foreach (var student in Students)
+                                    {
+                                        <li>@student.Name</li>
+                                    }
+                                </ul>
+
+                                <b>Number of students: @Students.Count</b>
+                            }
+                        </RadzenTabsItem>
+                        <RadzenTabsItem Text="Subjects">
+                            <h3>Subjects</h3>
+                            @if (Subjects.Count == 0)
+                            {
+                                <p>There is no subject assigned to this class.</p>
+                            }
+                            else
+                            {
+                                <ul>
+                                    @foreach (var subject in Subjects)
+                                    {
+                                        <li>@subject.Name</li>
+                                    }
+                                </ul>
+                            }
+                            <RadzenButton Text="Add subject" Click="@(() => OpenAddSubjectDialog())"/>
+                        </RadzenTabsItem>
+                    </Tabs>
+                </RadzenTabs>
+                <div>
+                    <a href="@($"/classes/edit?id={currentClass.Id}")">Edit</a> |
+                    <a href="@($"/classes")">Back to List</a>
+                </div>
+            }
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <RedirectNotFound/>
+    </NotAuthorized>
+</AuthorizeView>

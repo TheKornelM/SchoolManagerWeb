@@ -1,0 +1,44 @@
+﻿@page "/classes/edit"
+
+<PageTitle>Edit</PageTitle>
+
+<AuthorizeView Roles="Admin" Context="AuthContext">
+    <Authorized>
+        <h1>Edit</h1>
+
+        <h2>Class</h2>
+        <hr/>
+        @if (Class is null)
+        {
+            <p><em>Loading...</em></p>
+        }
+        else
+        {
+            <div class="row">
+                <div class="col-md-4">
+                    <EditForm method="post" Model="Class" OnValidSubmit="UpdateClass" FormName="edit" Enhance>
+                        <FluentValidationValidator Validator="ClassValidator"/>
+                        <div class="mb-3">
+                            <label for="year" class="form-label">Year:</label>
+                            <RadzenNumeric id="year" @bind-Value="Class.Year" class="form-control" Min="1"/>
+                            <ValidationMessage For="() => Class.Year" class="text-danger"/>
+                        </div>
+                        <div class="mb-3">
+                            <label for="class" class="form-label">Class:</label>
+                            <InputText id="class" @bind-Value="Class.SchoolClass" class="form-control"/>
+                            <ValidationMessage For="() => Class.SchoolClass" class="text-danger"/>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    </EditForm>
+                </div>
+            </div>
+        }
+
+        <div>
+            <a href="/classes">Back to List</a>
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <RedirectNotFound/>
+    </NotAuthorized>
+</AuthorizeView>

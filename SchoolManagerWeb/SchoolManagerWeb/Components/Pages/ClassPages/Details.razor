@@ -20,17 +20,22 @@
             {
                 <h2>Class: @currentClass.Name</h2>
                 <hr/>
-                /*<RadzenDataGrid Data="@Students">
-                    <RadzenDataGridColumn Property="@nameof(User.Name)"/>
-                </RadzenDataGrid>*/
                 <h3>Roster</h3>
-                @foreach (var student in Students)
+                if (Students.Count == 0)
                 {
-                    <p>@student.Name</p>
+                    <p>There are no students in this class.</p>
+                }
+                else
+                {
+                    @foreach (var student in Students)
+                    {
+                        <p>@student.Name</p>
+                    }
+
+                    <hr/>
+                    <label>Number of students: @Students.Count</label>
                 }
 
-                <hr/>
-                <label>Number of students: @Students.ToList().Count</label>
                 <hr/>
                 <div>
                     <a href="@($"/classes/edit?id={currentClass.Id}")">Edit</a> |
@@ -47,7 +52,7 @@
 @code {
     private Class? currentClass;
 
-    IQueryable<User> Students;
+    private List<User> Students;
 
     [SupplyParameterFromQuery] private int Id { get; set; }
 
@@ -65,7 +70,7 @@
 
         var result = await ClassManager.GetClassStudentsAsync(currentClass);
 
-        Students = result.AsQueryable();
+        Students = result;
     }
 
 }

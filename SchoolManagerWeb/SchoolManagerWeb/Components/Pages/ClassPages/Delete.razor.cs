@@ -2,14 +2,15 @@
 using Microsoft.EntityFrameworkCore;
 using Radzen;
 using SchoolManagerModel.Entities;
+using SchoolManagerWeb.Utils;
 
 namespace SchoolManagerWeb.Components.Pages.ClassPages;
 
 public partial class Delete
 {
-    [Inject] IDbContextFactory<SchoolManagerModel.Persistence.SchoolDbContext> DbFactory { get; set; }
-    [Inject] NavigationManager NavigationManager { get; set; }
-    [Inject] public required NotificationService NotificationService { get; set; }
+    [Inject] private IDbContextFactory<SchoolManagerModel.Persistence.SchoolDbContext> DbFactory { get; set; }
+    [Inject] private NavigationManager NavigationManager { get; set; }
+    [Inject] private Notifier Notifier { get; set; }
 
     private Class? currentClass { get; set; }
 
@@ -36,32 +37,24 @@ public partial class Delete
 
         var subjects = await ClassManager.GetClassSubjectsAsync(currentClass);
         var students = await ClassManager.GetClassStudentsAsync(currentClass);
+        var classes = await ClassManager.GetClassesAsync();
+
+        if (classes.All(x => x.Id != currentClass.Id))
+        {
+            Notifier.ShowError("Class not found. It was probably already deleted from the database");
+            return;
+        }
 
         if (subjects.Count != 0 || students.Count != 0)
         {
-            NotificationService.Notify(new NotificationMessage
-            {
-                Severity = NotificationSeverity.Error,
-                Summary = "Error",
-                Detail = "Cannot delete a class that has assigned students or subjects",
-                Duration = 4000,
-                Style = "word-break:break-word"
-            });
+            Notifier.ShowError("Cannot delete a class that has assigned students or subjects.");
             return;
         }
 
         using var context = DbFactory.CreateDbContext();
         context.Classes.Remove(currentClass!);
         await context.SaveChangesAsync();
-        NotificationService.Notify(new NotificationMessage
-        {
-            Severity = NotificationSeverity.Success,
-            Summary = "Success",
-            Detail = $"{currentClass.Name} was deleted successfully",
-            Duration = 4000,
-            Style = "word-break:break-word"
-        });
-
+        Notifier.ShowSuccess($"{currentClass.Name} was deleted successfully.");
         NavigationManager.NavigateTo("/classes");
     }
 }

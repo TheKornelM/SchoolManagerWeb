@@ -9,6 +9,7 @@ using SchoolManagerModel.Persistence;
 using SchoolManagerWeb.Components;
 using SchoolManagerWeb.Components.Account;
 using SchoolManagerWeb.Endpoints;
+using SchoolManagerWeb.Utils;
 
 
 namespace SchoolManagerWeb
@@ -138,6 +139,7 @@ namespace SchoolManagerWeb
             builder.Services.AddSingleton<IEmailSender<User>, IdentityNoOpEmailSender>();
             builder.Services.AddRadzenComponents();
             builder.Services.AddScoped<NotificationService>();
+            builder.Services.AddScoped<Notifier>();
 
             builder.Services.AddEndpointsApiExplorer();
 

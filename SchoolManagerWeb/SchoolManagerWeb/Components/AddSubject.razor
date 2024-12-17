@@ -1,0 +1,35 @@
+﻿@using Microsoft.EntityFrameworkCore
+@using SchoolManagerModel.Entities
+@using SchoolManagerModel.Entities.UserModel
+@using SchoolManagerModel.Persistence
+@using SchoolManagerModel.Managers
+@inject ClassManager ClassManager
+@inject TeacherManager TeacherManager
+@inject SubjectManager SubjectManager
+@inject DialogService DialogService
+
+<RadzenTemplateForm TItem="Subject" Data="@newSubject" Submit="@OnSubmit">
+    <!--<h3>Add Subject</h3>-->
+
+    <!-- Subject Name -->
+    <div class="form-group mb-3">
+        <label for="subjectName">Subject Name</label>
+        <RadzenTextBox @bind-Value="subjectName" Placeholder="Enter Subject Name" Style="width: 100%;"/>
+    </div>
+
+    <!-- Teacher Selection -->
+    <div class="form-group mb-3">
+        <label for="teacherSelect">Select Teacher</label>
+        <RadzenDropDown @bind-Value="selectedTeacher"
+                        Data="@teachers"
+                        TextProperty="User.Name"
+                        Placeholder="Choose a teacher"
+                        Style="width: 100%;"/>
+    </div>
+
+    <!-- Buttons -->
+    <div class="mt-3">
+        <RadzenButton Text="Save" Click="@OnSubmit" Style="margin-right: 10px;" ButtonStyle="ButtonStyle.Primary"/>
+        <RadzenButton Text="Cancel" Click="@OnCancel" ButtonStyle="ButtonStyle.Secondary"/>
+    </div>
+</RadzenTemplateForm>

@@ -64,6 +64,7 @@ public partial class Details
 
     private void OpenAddSubjectDialog()
     {
+        DialogService.OnClose += async o => await FetchSubjectsAsync();
         DialogService.Open<AddSubject>("Add subject", new Dictionary<string, object>
         {
             { "SelectedClass", currentClass }

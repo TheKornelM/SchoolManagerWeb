@@ -13,20 +13,21 @@
 
     <!-- Subject Name -->
     <div class="form-group mb-3">
-        <label for="subjectName">Subject Name</label>
+        <label for="subject_name">Subject Name</label>
         <RadzenTextBox Name="Name" @bind-Value="@newSubject.Name" Placeholder="Enter Subject Name"
-                       Style="width: 100%;"/>
+                       Style="width: 100%;" Id="subject_name"/>
         <RadzenRequiredValidator Component="Name" Text="Name is required"/>
     </div>
 
     <!-- Teacher Selection -->
     <div class="form-group mb-3">
-        <label for="teacherSelect">Select Teacher</label>
+        <label for="select_teacher">Select Teacher</label>
         <RadzenDropDown @bind-Value="@newSubject.Teacher"
                         Data="@teachers"
                         TextProperty="User.Name"
                         Placeholder="Choose a teacher"
                         Name="Teacher"
+                        Id="select_teacher"
                         Style="width: 100%;"/>
         <RadzenRequiredValidator Component="Teacher" Text="Please select a teacher."/>
     </div>

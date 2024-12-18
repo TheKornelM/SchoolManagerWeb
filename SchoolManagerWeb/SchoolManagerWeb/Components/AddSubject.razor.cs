@@ -9,7 +9,7 @@ namespace SchoolManagerWeb.Components;
 public partial class AddSubject
 {
     [Inject] public required Notifier Notifier { get; set; }
-    [Inject] public NavigationManager NavigationManager { get; set; }
+    [Inject] public required NavigationManager NavigationManager { get; set; }
     [Parameter] public required Class SelectedClass { get; set; } // Class passed as parameter
 
     private List<Teacher> teachers = [];

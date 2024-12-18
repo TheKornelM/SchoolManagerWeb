@@ -8,9 +8,9 @@ namespace SchoolManagerWeb.Components.Pages.ClassPages;
 
 public partial class Details
 {
-    [Inject] private DialogService DialogService { get; set; }
+    [Inject] public required DialogService DialogService { get; set; }
     private Class? currentClass;
-    private List<User> Students;
+    private List<User> Students = [];
     private List<Subject> Subjects = [];
     [SupplyParameterFromQuery] private int Id { get; set; }
 
@@ -51,19 +51,34 @@ public partial class Details
 
     private async Task FetchStudentsAsync()
     {
+        if (currentClass is null)
+        {
+            return;
+        }
+
         Students = await ClassManager.GetClassStudentsAsync(currentClass);
         StateHasChanged();
     }
 
     private async Task FetchSubjectsAsync()
     {
+        if (currentClass is null)
+        {
+            return;
+        }
+
         Subjects = await ClassManager.GetClassSubjectsAsync(currentClass);
         StateHasChanged();
     }
 
     private void OpenAddSubjectDialog()
     {
-        DialogService.OnClose += async o => await FetchSubjectsAsync();
+        if (currentClass is null)
+        {
+            return;
+        }
+
+        DialogService.OnClose += async _ => await FetchSubjectsAsync();
         DialogService.Open<AddSubject>("Add subject", new Dictionary<string, object>
         {
             { "SelectedClass", currentClass }

@@ -8,9 +8,9 @@ namespace SchoolManagerWeb.Components.Pages.ClassPages;
 
 public partial class Delete
 {
-    [Inject] private IDbContextFactory<SchoolManagerModel.Persistence.SchoolDbContext> DbFactory { get; set; }
-    [Inject] private NavigationManager NavigationManager { get; set; }
-    [Inject] private Notifier Notifier { get; set; }
+    [Inject] public required IDbContextFactory<SchoolManagerModel.Persistence.SchoolDbContext> DbFactory { get; set; }
+    [Inject] public required NavigationManager NavigationManager { get; set; }
+    [Inject] public required Notifier Notifier { get; set; }
 
     private Class? currentClass { get; set; }
 

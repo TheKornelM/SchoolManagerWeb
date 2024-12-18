@@ -1,0 +1,75 @@
+﻿@page "/subjects"
+@rendermode InteractiveServer
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using SchoolManagerModel.Entities
+@using SchoolManagerModel.Persistence
+@implements IAsyncDisposable
+@inject IDbContextFactory<SchoolDbContext> DbFactory
+
+<PageTitle>Index</PageTitle>
+
+<AuthorizeView>
+    <Authorized>
+        <h1>Your Subjects</h1>
+
+        @if (Subjects.Count == 0)
+        {
+            <p>You don't have assigned subjects.</p>
+        }
+        else
+        {
+            <div class="form-group mb-3">
+                <label for="subject_select">Select subject:</label>
+                <RadzenDropDown @bind-Value="SelectedSubject"
+                                Data="@Subjects"
+                                TextProperty="Name"
+                                Placeholder="Choose a subject"
+                                Name="Subject"
+                                Id="subject_select"
+                                Style="width: 50%;"/>
+            </div>
+
+            if (SelectedSubject != null && SelectedSubjectStudents.Count == 0)
+            {
+                <p>This subject doesn't have assigned students.</p>
+            }
+            else if (SelectedSubject != null)
+            {
+                <div class="form-group mb-3">
+                    <label for="student_select">Select student:</label>
+                    <RadzenDropDown @bind-Value="SelectedStudent"
+                                    Data="@SelectedSubjectStudents"
+                                    TextProperty="User.Name"
+                                    Placeholder="Choose a student"
+                                    Name="Student"
+                                    Id="student_select"
+                                    Style="width: 50%;"/>
+                </div>
+            }
+
+            if (SelectedStudent != null)
+            {
+                <h2>Marks</h2>
+                <div class="form-group mb-3">
+                    @if (SelectedStudentMarks.Count == 0)
+                    {
+                        <p>There is no recorded mark yet.</p>
+                    }
+                    else
+                    {
+                        <ul>
+                            @foreach (var mark in SelectedStudentMarks)
+                            {
+                                <li>@mark.Grade</li>
+                            }
+                        </ul>
+                    }
+                </div>
+            }
+        }
+    </Authorized>
+    <NotAuthorized>
+        <RedirectNotFound/>
+    </NotAuthorized>
+</AuthorizeView>

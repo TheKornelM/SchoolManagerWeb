@@ -9,8 +9,8 @@ namespace SchoolManagerWeb.Components.Pages.ClassPages;
 
 public partial class Create
 {
-    [Inject] Notifier _notifier { get; set; }
-    [Inject] ClassManager _classManager { get; set; }
+    [Inject] public required Notifier _notifier { get; set; }
+    [Inject] public required ClassManager _classManager { get; set; }
 
     [SupplyParameterFromForm]
     private Class? Class { get; set; } = new()

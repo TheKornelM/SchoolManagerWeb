@@ -8,7 +8,7 @@ namespace SchoolManagerWeb.Components.Pages.ClassPages;
 
 public partial class Details
 {
-    [Inject] private DialogService DialogService { get; set; }
+    [Inject] public required DialogService DialogService { get; set; }
     private Class? currentClass;
     private List<User> Students;
     private List<Subject> Subjects = [];

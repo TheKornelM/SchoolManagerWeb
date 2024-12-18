@@ -1,10 +1,10 @@
-﻿using System.Net.Http.Json;
-using Microsoft.AspNetCore.Components;
+﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Identity;
 using Radzen;
 using SchoolManagerModel.DTOs;
 using SchoolManagerModel.Entities;
+using System.Net.Http.Json;
 
 namespace SchoolManagerWeb.Client.Pages;
 
@@ -138,7 +138,10 @@ public partial class Register
             }
 
             var classes = await response.Content.ReadFromJsonAsync<List<Class>>(cancellationToken: cts.Token);
-            return classes ?? [];
+
+            return classes?.OrderBy(x => x.Year)
+                .ThenBy(x => x.SchoolClass)
+                .ThenBy(x => x.Id).ToList() ?? [];
         }
         catch (OperationCanceledException)
         {

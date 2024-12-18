@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Radzen;
 using SchoolManagerModel.Entities;
 using SchoolManagerModel.Entities.UserModel;
 using SchoolManagerModel.Extensions;
@@ -19,6 +20,7 @@ public partial class Index
     [Inject] public required TeacherManager TeacherManager { get; set; }
     [Inject] public required SubjectManager SubjectManager { get; set; }
     [Inject] public required Notifier Notifier { get; set; }
+    [Inject] public required DialogService DialogService { get; set; }
 
     private User? _user = null;
     private Subject? _selectedSubject;
@@ -126,6 +128,26 @@ public partial class Index
         }
 
         SelectedStudentMarks = await SubjectManager.GetStudentSubjectMarksAsync(_selectedStudent, _selectedSubject);
+    }
+
+    private void OpenAddMarkDialog()
+    {
+        if (SelectedSubject == null || SelectedStudent == null)
+        {
+            return;
+        }
+
+        DialogService.OnClose += async o =>
+        {
+            await GetMarksAsync();
+            StateHasChanged();
+        };
+
+        DialogService.Open<AddSubjectMark>("Add mark", new Dictionary<string, object>
+        {
+            { "Subject", SelectedSubject },
+            { "Student", SelectedStudent },
+        });
     }
 
     public async ValueTask DisposeAsync()

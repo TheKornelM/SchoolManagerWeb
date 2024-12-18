@@ -22,10 +22,11 @@ public partial class AddSubjectMark
     {
         var mark = new Mark
         {
+            Grade = Mark,
             Student = Student,
             Subject = Subject,
             Teacher = Subject.Teacher,
-            SubmitDate = DateTime.Now,
+            SubmitDate = DateTime.UtcNow,
             Notes = Notes
         };
 

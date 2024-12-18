@@ -1,12 +1,10 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.EntityFrameworkCore;
 using Radzen;
 using SchoolManagerModel.Entities;
 using SchoolManagerModel.Entities.UserModel;
 using SchoolManagerModel.Extensions;
 using SchoolManagerModel.Managers;
-using SchoolManagerModel.Persistence;
 using SchoolManagerModel.Utils;
 using SchoolManagerWeb.Utils;
 
@@ -22,7 +20,7 @@ public partial class Index
     [Inject] public required Notifier Notifier { get; set; }
     [Inject] public required DialogService DialogService { get; set; }
 
-    private User? _user = null;
+    private User? _user;
     private Subject? _selectedSubject;
     private Student? _selectedStudent;
     private List<Subject> Subjects { get; set; } = [];
@@ -137,7 +135,7 @@ public partial class Index
             return;
         }
 
-        DialogService.OnClose += async o =>
+        DialogService.OnClose += async _ =>
         {
             await GetMarksAsync();
             StateHasChanged();
@@ -148,9 +146,5 @@ public partial class Index
             { "Subject", SelectedSubject },
             { "Student", SelectedStudent },
         });
-    }
-
-    public async ValueTask DisposeAsync()
-    {
     }
 }

@@ -1,0 +1,29 @@
+﻿<h2>Marks</h2>
+@if (_marks.Count == 0)
+{
+    <p>You don't have a grade yet.</p>
+}
+else
+{
+    <div class="row">
+        @foreach (var mark in _marks)
+        {
+            <div class="col-md-6 mb-3">
+                <RadzenCard
+                    Style="display: flex; align-items: center; padding: 10px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);">
+                    <div
+                        style="width: 60px; height: 60px; border-radius: 50%; background-color: purple; color: white; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-right: 15px;">
+                        @mark.Grade
+                    </div>
+
+                    <div>
+                        <div style="font-weight: bold; font-size: 1.2rem;">@mark.Subject.Name</div>
+                        <div
+                            style="font-size: 0.9rem; color: gray;">@mark.Date</div>
+                        <div style="font-size: 0.9rem; color: gray;">@mark.Subject.Teacher.User.Name</div>
+                    </div>
+                </RadzenCard>
+            </div>
+        }
+    </div>
+}

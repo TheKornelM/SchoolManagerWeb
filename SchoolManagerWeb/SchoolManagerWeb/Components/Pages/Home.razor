@@ -1,8 +1,18 @@
 ﻿@page "/"
+@using SchoolManagerModel.Utils
 @attribute [Authorize]
 
 <PageTitle>Home</PageTitle>
 
-<h1>Hello, world!</h1>
+<AuthorizeView Roles="Student">
+    <Authorized>
+        <ShowMarks/>
+    </Authorized>
+    <NotAuthorized>
 
-Welcome to your new app.
+        <h1>Hello, world!</h1>
+
+        Welcome to your new app.
+    </NotAuthorized>
+</AuthorizeView>
+

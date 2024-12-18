@@ -1,7 +1,6 @@
 ﻿@page "/subjects"
 @rendermode InteractiveServer
 @using Microsoft.EntityFrameworkCore
-@using Microsoft.AspNetCore.Components.QuickGrid
 @using SchoolManagerModel.Entities
 @using SchoolManagerModel.Persistence
 @implements IAsyncDisposable
@@ -59,10 +58,13 @@
                     else
                     {
                         <ul>
-                            @foreach (var mark in SelectedStudentMarks)
-                            {
-                                <li>@mark.Grade</li>
-                            }
+                            <RadzenDataGrid TItem="Mark" Data="@SelectedStudentMarks" Class="w-100">
+                                <Columns>
+                                    <RadzenDataGridColumn TItem="Mark" Property="Grade" Title="Grade"/>
+                                    <RadzenDataGridColumn TItem="Mark" Property="Date" Title="Date"/>
+                                    <RadzenDataGridColumn TItem="Mark" Property="Notes" Title="Notes"/>
+                                </Columns>
+                            </RadzenDataGrid>
                         </ul>
                     }
                 </div>

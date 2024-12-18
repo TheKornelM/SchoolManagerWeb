@@ -1,14 +1,13 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Identity;
 using SchoolManagerModel.DTOs;
+using SchoolManagerModel.Entities;
 using SchoolManagerModel.Entities.UserModel;
+using SchoolManagerModel.Extensions;
 using SchoolManagerModel.Managers;
 using SchoolManagerModel.Utils;
-using SchoolManagerWeb.Components.Account.Pages;
-using System.Net;
-using Microsoft.AspNetCore.Http.HttpResults;
-using SchoolManagerModel.Entities;
-using SchoolManagerModel.Extensions;
 using SchoolManagerModel.Validators;
+using SchoolManagerWeb.Components.Account.Pages;
 
 namespace SchoolManagerWeb.Endpoints;
 
@@ -16,7 +15,6 @@ public static class UserEndpoints
 {
     public static WebApplication AddUserEndpoints(this WebApplication app)
     {
-        app.MapGet("hi", () => Results.Json("hello")).RequireAuthorization("RequireAdminRole");
         app.MapPost("user",
                 async Task<Results<Ok<string>, BadRequest<List<IdentityError>>, InternalServerError>> (
                     UserRegistrationDto userDto,
@@ -85,7 +83,7 @@ public static class UserEndpoints
                         if (userDto.AssignedSubjects.Distinct().Count() != userDto.AssignedSubjects.Count)
                         {
                             identityErrors.Add(new IdentityError
-                                { Description = "Given subject IDs must be unique." });
+                            { Description = "Given subject IDs must be unique." });
                         }
 
                         var classSubjects = await classManager.GetClassSubjectsAsync(@class);

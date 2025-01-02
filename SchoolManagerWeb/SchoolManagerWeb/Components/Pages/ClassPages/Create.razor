@@ -5,6 +5,7 @@
 @using SchoolManagerModel.Validators
 @inject IDbContextFactory<SchoolManagerModel.Persistence.SchoolDbContext> DbFactory
 @inject NavigationManager NavigationManager
+@rendermode InteractiveServer
 
 <PageTitle>Create</PageTitle>
 <AuthorizeView Roles="Admin" Context="AuthContext">

@@ -1,3 +1,4 @@
+using DotNetEnv;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Hosting.StaticWebAssets;
 using Microsoft.AspNetCore.Identity;
@@ -34,7 +35,7 @@ namespace SchoolManagerWeb
             builder.Services.AddScoped<IdentityUserAccessor>();
             builder.Services.AddScoped<IdentityRedirectManager>();
             builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
-            StaticWebAssetsLoader.UseStaticWebAssets(builder.Environment, builder.Configuration);
+
 
             builder.Services.AddAuthorization(options =>
             {
@@ -152,6 +153,9 @@ namespace SchoolManagerWeb
             {
                 app.UseWebAssemblyDebugging();
                 app.UseMigrationsEndPoint();
+                app.UseSwagger();
+                app.UseSwaggerUI();
+                StaticWebAssetsLoader.UseStaticWebAssets(builder.Environment, builder.Configuration);
                 /*app.UseSwagger();
                 app.UseSwaggerUI(c =>
                 {
@@ -164,12 +168,6 @@ namespace SchoolManagerWeb
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
                 app.UseMigrationsEndPoint();
-            }
-
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI();
             }
 
             app.UseHttpsRedirection();

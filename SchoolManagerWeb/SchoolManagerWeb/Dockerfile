@@ -32,12 +32,4 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0 AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 
-# Install dotnet-ef tool in the final stage
-#RUN dotnet tool install --global dotnet-ef
-#ENV PATH="$PATH:/root/.dotnet/tools"
-
-# Run migrations if the database is not up to date
-
-#CMD ["bash", "-c", "dotnet ef database update || dotnet ef migrations add InitialCreate && dotnet ef database update"]
-
 ENTRYPOINT ["dotnet", "SchoolManagerWeb.dll"]

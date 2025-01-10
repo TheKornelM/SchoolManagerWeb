@@ -14,6 +14,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d:ro
 
   schoolmanagerweb:
     image: ${DOCKER_REGISTRY-}schoolmanagerweb
@@ -26,7 +27,7 @@ services:
       - "80:5000"
       - "443:5001"
     volumes:
-      - ./SchoolManagerWeb/SchoolManagerWeb/certs:/https:ro # Mount the cert directory as read-only
+      - ./SchoolManagerWeb/SchoolManagerWeb/certs:/https:ro
     depends_on:
       - postgres
     env_file:

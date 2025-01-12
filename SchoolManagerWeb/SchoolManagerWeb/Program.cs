@@ -9,9 +9,7 @@ using SchoolManagerModel.Managers;
 using SchoolManagerModel.Persistence;
 using SchoolManagerWeb.Components;
 using SchoolManagerWeb.Components.Account;
-using SchoolManagerWeb.Endpoints;
 using SchoolManagerWeb.Utils;
-
 
 namespace SchoolManagerWeb
 {
@@ -179,8 +177,6 @@ namespace SchoolManagerWeb
 
             // Add additional endpoints required by the Identity /Account Razor components.
             app.MapAdditionalIdentityEndpoints();
-            app.AddUserEndpoints();
-            app.MapClassEndpoints();
 
             app.UseAntiforgery();
 

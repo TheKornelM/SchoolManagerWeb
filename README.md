@@ -21,7 +21,11 @@ Ensure the certificate is trusted on your system:\
 5. Return to the Root Directory\
 `cd ../..`
 
-6. Start the Docker Containers\
+6. Build latest image\
+`docker-compose build`\
+You can skip this step if there isn't an older build because `docker-compose up` will do a build if image not exists on the computer.
+
+7. Start the Docker Containers\
 First, start the migration container to ensure the database is initialized:\
 `docker-compose up migrate`\
 Then, start the application container:\

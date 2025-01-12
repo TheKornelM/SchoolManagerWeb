@@ -1,4 +1,4 @@
-Set-Location -Path "SchoolManagerWeb/SchoolManagerWeb"
+Set-Location -Path "../SchoolManagerWeb/SchoolManagerWeb"
 mkdir certs
 
 # Generate HTTPS development certificate and export it
@@ -9,5 +9,6 @@ dotnet dev-certs https --trust
 
 # Start containers
 Set-Location -Path "../.."
+docker-compose build
 docker-compose up migrate
 docker-compose up schoolmanagerweb

@@ -20,7 +20,7 @@ if [ $RETRIES -eq 0 ]; then
   exit 1
 fi
 
-echo "Applying database migrations with the provided connection string..."
+echo "Applying database migrations with the provided connection string.."
 exec app/efbundle --connection "$ConnectionStrings__DefaultConnection"
 
 echo "Starting the application...."

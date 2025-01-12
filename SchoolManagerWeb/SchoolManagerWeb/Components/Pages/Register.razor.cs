@@ -24,6 +24,7 @@ public partial class Register
     [Inject] public required ClassManager ClassManager { get; set; }
     [Inject] public required SubjectManager SubjectManager { get; set; }
     [Inject] public required IUserStore<User> UserStore { get; set; }
+    [Inject] public required ILogger<Register> Logger { get; set; }
 
     [SupplyParameterFromForm] private UserRegistrationDto Input { get; set; } = new();
     [SupplyParameterFromQuery] private string? ReturnUrl { get; set; }
@@ -63,7 +64,6 @@ public partial class Register
                 return;
             }
 
-            // User validator
             var user = Input.ToUser();
 
             var userValidator =
@@ -74,7 +74,7 @@ public partial class Register
             {
                 identityErrors = validationResult.Errors.Select(error => new IdentityError
                 {
-                    Description = $"{error.PropertyName}: {error.ErrorMessage}"
+                    Description = error.ErrorMessage
                 }).ToList();
 
                 ShowIdentityErrorsNotification();
@@ -92,21 +92,17 @@ public partial class Register
             if (!result.Succeeded)
             {
                 identityErrors = result.Errors;
+                ShowIdentityErrorsNotification();
                 return;
             }
 
-            //Logger.LogInformation("User created a new account with password.");
-
-            Console.WriteLine("Input.Role:" + Input.Role);
             await UserManager.AddToRoleAsync(user, Input.Role);
-            //await UserManager.AssignRoleAsync(user, StringRoleConverter.GetRole("Admin"));
 
             var role = StringRoleConverter.GetRole(Input.Role);
             switch (role)
             {
                 case Role.Student:
                     var selectedClass = Classes.First(cls => cls.Id == Input.AssignedClassId);
-                    // Get the intersection of Input.AssignedSubjects and Subjects by their IDs
                     var selectedSubjects = Subjects
                         .Where(subject => Input.AssignedSubjects.Contains(subject.Id))
                         .ToList();
@@ -135,27 +131,7 @@ public partial class Register
                     break;
             }
 
-            var userId = await UserManager.GetUserIdAsync(user);
-            var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
-            code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-            var callbackUrl = NavigationManager.GetUriWithQueryParameters(
-                NavigationManager.ToAbsoluteUri("Account/ConfirmEmail").AbsoluteUri,
-                new Dictionary<string, object?> { ["userId"] = userId, ["code"] = code, ["returnUrl"] = ReturnUrl });
-
-            /*await EmailSender.SendConfirmationLinkAsync(user, Input.Email, HtmlEncoder.Default.Encode(callbackUrl));
-
-
-            if (UserManager.Options.SignIn.RequireConfirmedAccount)
-            {
-                RedirectManager.RedirectTo(
-                    "Account/RegisterConfirmation",
-                    new() { ["email"] = Input.Email, ["returnUrl"] = ReturnUrl });
-            }
-
-            RedirectManager.RedirectTo(ReturnUrl);*/
-
-
-            //var response = await HttpClient.PostAsJsonAsync("user", Input, cts.Token);
+            Logger.LogInformation($"New user has been created (username: {user.UserName}, email: {user.Email})");
 
             NotificationService.Notify(new NotificationMessage
             {
@@ -165,6 +141,7 @@ public partial class Register
                 Duration = 4000,
                 Style = "word-break:break-word"
             });
+
             Input = new UserRegistrationDto();
             SelectedSubjectIds = [];
             AttachEventHandlers();
@@ -197,19 +174,6 @@ public partial class Register
         else
         {
             Classes.Clear();
-        }
-    }
-
-    private User CreateUser()
-    {
-        try
-        {
-            return Activator.CreateInstance<User>();
-        }
-        catch
-        {
-            throw new InvalidOperationException(
-                $"Can't create an instance of '{nameof(User)}'. Ensure it's not abstract and has a parameterless constructor.");
         }
     }
 

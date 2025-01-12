@@ -22,20 +22,11 @@ RUN dotnet tool install --global dotnet-ef
 ENV PATH="$PATH:/root/.dotnet/tools"
 
 WORKDIR "/src/SchoolManagerWeb/SchoolManagerWeb"
-RUN dotnet build "./SchoolManagerWeb.csproj" -c $BUILD_CONFIGURATION -o /app/build
 RUN dotnet ef migrations bundle --context SchoolDbContext --verbose --target-runtime linux-x64 --self-contained -o /app/efbundle
-
-# Publish the application
-FROM build AS publish
-ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./SchoolManagerWeb.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 # Final image for running the application
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS final
 WORKDIR /app
-
-# Copy published app from the publish stage
-COPY --from=publish /app/publish .
 
 # Copy the efbundle
 COPY --from=build /app/efbundle /app/efbundle

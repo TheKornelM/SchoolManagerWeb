@@ -23,5 +23,5 @@ fi
 echo "Applying database migrations with the provided connection string..."
 exec app/efbundle --connection "$ConnectionStrings__DefaultConnection"
 
-echo "Starting the application..."
+echo "Starting the application...."
 exec dotnet app/SchoolManagerWeb.dll

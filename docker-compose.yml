@@ -32,6 +32,18 @@ services:
       - postgres
     env_file:
       - .env
+      
+  migrate:
+    image: ${DOCKER_REGISTRY-}schoolmanagerweb-migrate
+    build:
+      context: .
+      dockerfile: migration.dockerfile
+    networks:
+      - app-network
+    depends_on:
+      - postgres
+    env_file:
+      - .env
 
 networks:
   app-network:

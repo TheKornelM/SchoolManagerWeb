@@ -1,3 +1,33 @@
+# Deployment
+
+Run `start.ps1` in `setup` folder.
+
+Manual deployment steps:
+
+1. Navigate to the Project Directory\
+`cd SchoolManagerWeb/SchoolManagerWeb`
+
+2. Create a Directory for Certificates\
+`mkdir certs`
+
+3. Generate an HTTPS Development Certificate\
+Generate the certificate and save it to the certs directory with a password:\
+`dotnet dev-certs https -ep ".\certs\SchoolManagerWeb.pfx" -p "password"`
+
+4. Trust the Development Certificate\
+Ensure the certificate is trusted on your system:\
+`dotnet dev-certs https --trust`
+
+5. Return to the Root Directory\
+`cd ../..`
+
+6. Start the Docker Containers\
+First, start the migration container to ensure the database is initialized:\
+`docker-compose up migrate`\
+Then, start the application container:\
+`docker-compose up schoolmanagerweb`
+
+
 # HTTPS connection
 
 You need to create HTTPS certificate, move it to SchoolManagerWeb\certs.
@@ -51,6 +81,14 @@ This section describes the environment variables used to configure SchoolManager
 - **`POSTGRES_DB`**
   - Name of the default PostgreSQL database to be created.
   - **Example:** `postgres`
+  
+- **`POSTGRES_HOST`**
+  - PostgreSQL host name
+  - **Example:** `postgres` or `127.0.0.1`
+  
+- **`POSTGRES_PORT`**
+  - PostgreSQL port address
+  - **Example:** `5432`
 
 ---
 
